@@ -1,5 +1,5 @@
 name: Rebuild daily list
-
+#force reregistration
 on:
   schedule:
     - cron: "10 1 * * *"  # 01:10 UTC
