@@ -1,5 +1,5 @@
 name: Collect completions
-
+#force reregistration
 on:
   schedule:
     - cron: "50 22 * * *"  # 22:50 UTC
