@@ -5,8 +5,7 @@ import time
 from datetime import datetime
 import os
 
-
-TODOIST_TOKEN = "e6f35bd7cc31073399eb496b415fb0ecf11def0d" 
+TODOIST_TOKEN = os.environ["TODOIST_TOKEN"] 
 PROJECT_ID = "6fxHrQ58f8jFXp24" 
 TARGET_GOAL = 30 
 
