@@ -1,3 +1,26 @@
+import requests
+import time
+from datetime import datetime
+import os
+
+TODOIST_TOKEN = os.environ["TODOIST_TOKEN"] 
+PROJECT_ID = "6fxHrQ58f8jFXp24" 
+TARGET_GOAL = 30 
+
+headers = {
+    "Authorization": f"Bearer {TODOIST_TOKEN}",
+    "Content-Type": "application/json",
+}
+
+# Load your files
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+food_record = pd.read_csv(os.path.join(BASE_DIR, "food_record.csv"))
+food_reference = pd.read_csv(os.path.join(BASE_DIR, "food_reference.csv"))
+
+print(f"Loaded food_record with columns: {list(food_record.columns)}")
+print(f"Food record shape: {food_record.shape}")
+
+
 # --- 2. INGEST TODAY'S COMPLETED ITEMS ---
 print("Checking Todoist for today's completions...")
 url_sync = "https://api.todoist.com/rest/v1/completed/get_all"
