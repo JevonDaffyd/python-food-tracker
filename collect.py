@@ -30,40 +30,29 @@ print(f"Food record shape: {food_record.shape}", flush=True)
 # --- 2. INGEST TODAY'S COMPLETED ITEMS ---
 print("Checking Todoist for today's completions...", flush=True)
 
-# Initialize SDK client
+# --- SDK fetch (replace your existing fetch block with this) ---
 api = TodoistAPI(TODOIST_TOKEN)
 
-# Use SDK to fetch completed items for today
 today_date = date.today()
 since = f"{today_date}T00:00:00"
 until = f"{today_date}T23:59:59"
 
-def fetch_completed_with_timeout(timeout_seconds=30):
-    def _fetch():
-        # Try likely SDK method names; adapt if your SDK version differs
-        try:
-            return api.get_completed_tasks(since=since, until=until, project_id=PROJECT_ID, limit=200)
-        except AttributeError:
-            try:
-                return api.get_completed_items(since=since, until=until, project_id=PROJECT_ID, limit=200)
-            except AttributeError:
-                raise RuntimeError(
-                    "Installed todoist SDK does not expose a completed-items method named "
-                    "'get_completed_tasks' or 'get_completed_items'. Check the SDK docs for your version."
-                )
-
-    with ThreadPoolExecutor(max_workers=1) as ex:
-        fut = ex.submit(_fetch)
-        try:
-            return fut.result(timeout=timeout_seconds)
-        except TimeoutError:
-            print(f"ERROR: Todoist fetch timed out after {timeout_seconds}s", flush=True)
-            return []
-        except Exception as e:
-            print(f"ERROR: Todoist fetch failed: {e}", flush=True)
-            return []
-
-completed_items_raw = fetch_completed_with_timeout(timeout_seconds=30)
+try:
+    completed_items_raw = api.get_completed_tasks_by_completion_date(
+        since=since,
+        until=until,
+        project_id=PROJECT_ID,
+        limit=200
+    )
+except AttributeError:
+    available = [m for m in dir(api) if m.startswith("get_completed")]
+    raise RuntimeError(
+        "Todoist SDK in this environment does not expose "
+        "'get_completed_tasks_by_completion_date'. Available methods: "
+        f"{available}. Check the SDK docs or upgrade the package."
+    )
+except Exception as exc:
+    raise SystemExit(f"Error fetching completed items from Todoist SDK: {exc}")
 
 # Normalize SDK return (list of dicts or objects)
 normalized_items = []
