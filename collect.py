@@ -66,7 +66,7 @@ if res.status_code == 200:
         print("ℹ No new entries to log (all items already recorded or none completed today)")
 else:
     print(f"✗ Error fetching completions: {res.status_code}")
-    print(f"✗ Response: {res.text}")one completed today)")
+    print(f"✗ Response: {res.text} — one completed today")
 else:
     print(f"✗ Error fetching completions: {res.status_code}")
     print(f"✗ Response: {res.text}")
