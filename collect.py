@@ -1,63 +1,50 @@
-import requests
-import time
-from datetime import datetime
-import os
-import pandas as pd
-
-TODOIST_TOKEN = os.environ["TODOIST_TOKEN"] 
-PROJECT_ID = "6fxHrQ58f8jFXp24" 
-TARGET_GOAL = 30 
-
-headers = {
-    "Authorization": f"Bearer {TODOIST_TOKEN}",
-    "Content-Type": "application/json",
-}
-
-# Load your files
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-food_record = pd.read_csv(os.path.join(BASE_DIR, "food_record.csv"))
-food_reference = pd.read_csv(os.path.join(BASE_DIR, "food_reference.csv"))
-
-print(f"Loaded food_record with columns: {list(food_record.columns)}")
-print(f"Food record shape: {food_record.shape}")
-
-
-# --- 2. INGEST TODAY'S COMPLETED ITEMS ---
+# --- Replace existing fetch block with this ---
 print("Checking Todoist for today's completions...")
-url_sync = "https://api.todoist.com/rest/v1/completed/get_all"
-# Sync API v9 endpoint for completed items
-url_sync = "https://api.todoist.com/sync/v9/completed/get_all"
 
-# Use since/until to limit to today's completions
-today = datetime.now().date()
-since = f"{today}T00:00:00"
-until = f"{today}T23:59:59"
+# Use the v1 endpoint that supports project_id and since/until
+url = "https://api.todoist.com/api/v1/tasks/completed_by_completion_date"
 
-# Use query params for GET request
+# Use UTC ISO timestamps (append Z)
+today = datetime.utcnow().date()
+since = f"{today}T00:00:00Z"
+until = f"{today}T23:59:59Z"
+
 params = {
-    "project_id": PROJECT_ID,
-    "limit": 50,
     "since": since,
     "until": until,
-    "project_id": PROJECT_ID,   
-    "limit": 200
+    "project_id": PROJECT_ID,
+    "limit": 200,
 }
 
-res = requests.get(url_sync, headers=headers, params=params)
-print(res.status_code)
-print(res.text[:1000])  # quick preview of response
+completed_items = []
+try:
+    r = requests.get(url, headers=headers, params=params, timeout=20)
+    r.raise_for_status()
+    data = r.json()
+    completed_items.extend(data.get("items", []))
 
-if res.status_code == 200:
-    completed_items = res.json().get('items', [])
-    today_str = datetime.now().strftime('%Y-%m-%d')
+    # Pagination: follow cursor if present
+    cursor = data.get("cursor")
+    while cursor:
+        params["cursor"] = cursor
+        r = requests.get(url, headers=headers, params=params, timeout=20)
+        r.raise_for_status()
+        data = r.json()
+        completed_items.extend(data.get("items", []))
+        cursor = data.get("cursor")
+
     print(f"✓ Found {len(completed_items)} completed items")
+    today_str = datetime.utcnow().strftime('%Y-%m-%d')
     print(f"Today's date: {today_str}")
 
     new_entries = []
     for item in completed_items:
-        completion_date = item['completed_at'].split('T')[0]
+        # completed_at is ISO timestamp like 2026-02-12T14:00:00Z
+        completion_date = item.get('completed_at', '').split('T')[0]
         if completion_date == today_str:
-            food_name = item['content']
+            food_name = item.get('content', '').strip()
+            if not food_name:
+                continue
             # Avoid duplicates
             if not ((food_record['Date'] == today_str) & (food_record['Food'] == food_name)).any():
                 new_entries.append({"Date": today_str, "Food": food_name})
@@ -68,15 +55,19 @@ if res.status_code == 200:
     if new_entries:
         print(f"\nAdding {len(new_entries)} new entries to food_record...")
         food_record = pd.concat([food_record, pd.DataFrame(new_entries)], ignore_index=True)
-
         csv_path = os.path.join(BASE_DIR, "food_record.csv")
         food_record.to_csv(csv_path, index=False, encoding="utf-8")
-
         print(f"✓ Successfully wrote {len(new_entries)} new entries to food_record.csv")
         print(f"✓ CSV file location: {csv_path}")
         print(f"✓ New total rows: {len(food_record)}")
     else:
         print("ℹ No new entries to log (all items already recorded or none completed today)")
-else:
-    print(f"✗ Error fetching completions: {res.status_code}")
+
+except requests.RequestException as e:
+    print(f"✗ Error fetching completions: {getattr(e, 'response', None) and e.response.status_code or 'request error'}")
+    # print server response body if available
+    if hasattr(e, "response") and e.response is not None:
+        print(f"✗ Response: {e.response.text[:1000]}")
+    else:
+        print(f"✗ Request error: {e}")
     print(f"✗ Response: {res.text}")
