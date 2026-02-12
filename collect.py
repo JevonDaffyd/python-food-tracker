@@ -108,4 +108,4 @@ if new_entries:
     print(f"✓ CSV file location: {csv_path}", flush=True)
     print(f"✓ New total rows: {len(food_record)}", flush=True)
 else:
-    print("ℹ No new entries to log (all items already recorded or none completed today)", flush=True)text}")
+    print("ℹ No new entries to log (all items already recorded or none completed today)", flush=True)
