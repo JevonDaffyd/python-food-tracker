@@ -39,5 +39,6 @@ if res.status_code == 200:
 
     if new_entries:
         food_record = pd.concat([food_record, pd.DataFrame(new_entries)], ignore_index=True)
+        food_record.to_csv(os.path.join(BASE_DIR, "food_record.csv"), index=False, encoding="utf-8")
 else:
     print(f"Error fetching completions: {res.text}")
