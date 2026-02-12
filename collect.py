@@ -1,4 +1,29 @@
-# --- Replace existing fetch block with this ---
+#!/usr/bin/env python3
+import requests
+import time
+from datetime import datetime
+import os
+import pandas as pd
+
+# Config
+TODOIST_TOKEN = os.environ["TODOIST_TOKEN"]
+PROJECT_ID = "6fxHrQ58f8jFXp24"
+TARGET_GOAL = 30
+
+# Headers for Todoist HTTP API
+headers = {
+    "Authorization": f"Bearer {TODOIST_TOKEN}",
+}
+
+# Load CSVs
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+food_record = pd.read_csv(os.path.join(BASE_DIR, "food_record.csv"))
+food_reference = pd.read_csv(os.path.join(BASE_DIR, "food_reference.csv"))
+
+print(f"Loaded food_record with columns: {list(food_record.columns)}")
+print(f"Food record shape: {food_record.shape}")
+
+# --- 2. INGEST TODAY'S COMPLETED ITEMS ---
 print("Checking Todoist for today's completions...")
 
 # Use the v1 endpoint that supports project_id and since/until
@@ -64,10 +89,9 @@ try:
         print("ℹ No new entries to log (all items already recorded or none completed today)")
 
 except requests.RequestException as e:
-    print(f"✗ Error fetching completions: {getattr(e, 'response', None) and e.response.status_code or 'request error'}")
-    # print server response body if available
+    status = getattr(e, "response", None) and e.response.status_code or "request error"
+    print(f"✗ Error fetching completions: {status}")
     if hasattr(e, "response") and e.response is not None:
         print(f"✗ Response: {e.response.text[:1000]}")
     else:
         print(f"✗ Request error: {e}")
-    print(f"✗ Response: {res.text}")
