@@ -19,6 +19,9 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 food_record = pd.read_csv(os.path.join(BASE_DIR, "food_record.csv"))
 food_reference = pd.read_csv(os.path.join(BASE_DIR, "food_reference.csv"))
 
+print(f"Loaded food_record with columns: {list(food_record.columns)}")
+print(f"Food record shape: {food_record.shape}")
+
 # --- 2. INGEST TODAY'S COMPLETED ITEMS ---
 print("Checking Todoist for today's completions...")
 url_sync = "https://api.todoist.com/sync/v9/completed/get_all"
@@ -26,7 +29,11 @@ res = requests.get(url_sync, headers=headers, params={"project_id": PROJECT_ID, 
 
 if res.status_code == 200:
     completed_items = res.json().get('items', [])
+    print(f"✓ Found {len(completed_items)} completed items today")
+    
     today_str = datetime.now().strftime('%Y-%m-%d')
+    print(f"Today's date: {today_str}")
+    
     new_entries = []
     for item in completed_items:
         completion_date = item['completed_at'].split('T')[0]
@@ -35,10 +42,22 @@ if res.status_code == 200:
             # Avoid duplicates
             if not ((food_record['Date'] == today_str) & (food_record['Food'] == food_name)).any():
                 new_entries.append({"Date": today_str, "Food": food_name})
-                print(f"Logged: {food_name}")
+                print(f"  ✓ Logged: {food_name}")
+            else:
+                print(f"  ✗ Duplicate skipped: {food_name}")
 
     if new_entries:
+        print(f"\nAdding {len(new_entries)} new entries to food_record...")
         food_record = pd.concat([food_record, pd.DataFrame(new_entries)], ignore_index=True)
-        food_record.to_csv(os.path.join(BASE_DIR, "food_record.csv"), index=False, encoding="utf-8")
+        
+        csv_path = os.path.join(BASE_DIR, "food_record.csv")
+        food_record.to_csv(csv_path, index=False, encoding="utf-8")
+        
+        print(f"✓ Successfully wrote {len(new_entries)} new entries to food_record.csv")
+        print(f"✓ CSV file location: {csv_path}")
+        print(f"✓ New total rows: {len(food_record)}")
+    else:
+        print("ℹ No new entries to log (all items already recorded or none completed today)")
 else:
-    print(f"Error fetching completions: {res.text}")
+    print(f"✗ Error fetching completions: {res.status_code}")
+    print(f"✗ Response: {res.text}")
