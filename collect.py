@@ -2,6 +2,7 @@ import requests
 import time
 from datetime import datetime
 import os
+import pandas as pd
 
 TODOIST_TOKEN = os.environ["TODOIST_TOKEN"] 
 PROJECT_ID = "6fxHrQ58f8jFXp24" 
