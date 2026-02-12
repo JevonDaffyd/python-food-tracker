@@ -30,7 +30,7 @@ print(f"Food record shape: {food_record.shape}", flush=True)
 # --- 2. INGEST TODAY'S COMPLETED ITEMS ---
 print("Checking Todoist for today's completions...", flush=True)
 
-# --- SDK fetch (replace your existing fetch block with this) ---
+# --- Minimal replacement: fetch without project_id, then filter locally ---
 api = TodoistAPI(TODOIST_TOKEN)
 
 today_date = date.today()
@@ -41,30 +41,36 @@ try:
     completed_items_raw = api.get_completed_tasks_by_completion_date(
         since=since,
         until=until,
-        project_id=PROJECT_ID,
         limit=200
     )
 except AttributeError:
     available = [m for m in dir(api) if m.startswith("get_completed")]
     raise RuntimeError(
-        "Todoist SDK in this environment does not expose "
-        "'get_completed_tasks_by_completion_date'. Available methods: "
-        f"{available}. Check the SDK docs or upgrade the package."
+        "Todoist SDK does not expose 'get_completed_tasks_by_completion_date'. "
+        f"Available methods: {available}"
     )
 except Exception as exc:
     raise SystemExit(f"Error fetching completed items from Todoist SDK: {exc}")
 
-# Normalize SDK return (list of dicts or objects)
+# Filter returned items to your project id (if the SDK returns project info)
 normalized_items = []
 for it in completed_items_raw:
+    # handle dicts or objects
     if isinstance(it, dict):
-        normalized_items.append(it)
+        proj = it.get("project_id") or it.get("project")
+        content = it.get("content")
+        completed_at = it.get("completed_at")
     else:
-        # try to convert object to dict by attribute access
-        content = getattr(it, "content", None) or getattr(it, "task", None)
+        proj = getattr(it, "project_id", None) or getattr(it, "project", None)
+        content = getattr(it, "content", None)
         completed_at = getattr(it, "completed_at", None) or getattr(it, "completed_date", None)
-        if content and completed_at:
-            normalized_items.append({"content": content, "completed_at": completed_at})
+
+    # skip items not in your project (if project info is present)
+    if proj and str(proj) != str(PROJECT_ID):
+        continue
+
+    if content and completed_at:
+        normalized_items.append({"content": content, "completed_at": completed_at})
 
 today_str = datetime.now().strftime('%Y-%m-%d')
 print(f"✓ Found {len(normalized_items)} completed items (SDK)", flush=True)
