@@ -24,28 +24,33 @@ print(f"Food record shape: {food_record.shape}")
 
 # --- 2. INGEST TODAY'S COMPLETED ITEMS ---
 print("Checking Todoist for today's completions...")
-url_sync = "https://api.todoist.com/rest/v2/tasks"
-res = requests.get(url_sync, headers=headers)
+url_sync = "https://api.todoist.com/sync/v9/completed/get_all"
+
+# Use POST instead of GET, with project_id in the body
+payload = {
+    "project_id": PROJECT_ID,
+    "limit": 50
+}
+
+res = requests.post(url_sync, headers=headers, json=payload)
 
 if res.status_code == 200:
-    all_tasks = res.json()
+    completed_items = res.json().get('items', [])
     today_str = datetime.now().strftime('%Y-%m-%d')
-    print(f"✓ Found {len(all_tasks)} tasks")
+    print(f"✓ Found {len(completed_items)} completed items")
     print(f"Today's date: {today_str}")
     
     new_entries = []
-    for task in all_tasks:
-        # Check if task is completed and completed today
-        if task.get('is_completed') and task.get('completed_at'):
-            completion_date = task['completed_at'].split('T')[0]
-            if completion_date == today_str:
-                food_name = task['content']
-                # Avoid duplicates
-                if not ((food_record['Date'] == today_str) & (food_record['Food'] == food_name)).any():
-                    new_entries.append({"Date": today_str, "Food": food_name})
-                    print(f"  ✓ Logged: {food_name}")
-                else:
-                    print(f"  ✗ Duplicate skipped: {food_name}")
+    for item in completed_items:
+        completion_date = item['completed_at'].split('T')[0]
+        if completion_date == today_str:
+            food_name = item['content']
+            # Avoid duplicates
+            if not ((food_record['Date'] == today_str) & (food_record['Food'] == food_name)).any():
+                new_entries.append({"Date": today_str, "Food": food_name})
+                print(f"  ✓ Logged: {food_name}")
+            else:
+                print(f"  ✗ Duplicate skipped: {food_name}")
 
     if new_entries:
         print(f"\nAdding {len(new_entries)} new entries to food_record...")
@@ -60,5 +65,5 @@ if res.status_code == 200:
     else:
         print("ℹ No new entries to log (all items already recorded or none completed today)")
 else:
-    print(f"✗ Error fetching tasks: {res.status_code}")
+    print(f"✗ Error fetching completions: {res.status_code}")
     print(f"✗ Response: {res.text}")
