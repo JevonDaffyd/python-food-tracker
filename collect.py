@@ -1,3 +1,27 @@
+# --- 1. SETUP & DATA LOADING (THIS NEEDS SCHEDULED BEFORE MIDNIGHT) ---
+import pandas as pd
+import requests
+import time
+from datetime import datetime
+import os
+
+TODOIST_TOKEN = os.environ["TODOIST_TOKEN"] 
+PROJECT_ID = "6fxHrQ58f8jFXp24" 
+TARGET_GOAL = 30 
+
+headers = {
+    "Authorization": f"Bearer {TODOIST_TOKEN}",
+    "Content-Type": "application/json",
+}
+
+# Load your files
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+food_record = pd.read_csv(os.path.join(BASE_DIR, "food_record.csv"))
+food_reference = pd.read_csv(os.path.join(BASE_DIR, "food_reference.csv"))
+
+print(f"Loaded food_record with columns: {list(food_record.columns)}")
+print(f"Food record shape: {food_record.shape}")
+
 # --- 2. INGEST TODAY'S COMPLETED ITEMS ---
 print("Checking Todoist for today's completions...")
 url_sync = "https://api.todoist.com/rest/v2/tasks"
@@ -37,6 +61,4 @@ if res.status_code == 200:
         print("ℹ No new entries to log (all items already recorded or none completed today)")
 else:
     print(f"✗ Error fetching tasks: {res.status_code}")
-    print(f"✗ Response: {res.text}")
-    print(f"✗ Error fetching completions: {res.status_code}")
     print(f"✗ Response: {res.text}")
