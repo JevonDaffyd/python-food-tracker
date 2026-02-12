@@ -26,7 +26,7 @@ print(f"Food record shape: {food_record.shape}")
 print("Checking Todoist for today's completions...")
 url_sync = "https://api.todoist.com/rest/v1/completed/get_all"
 
-# Use query params instead of body for GET request
+# Use query params for GET request
 params = {
     "project_id": PROJECT_ID,
     "limit": 50
@@ -64,9 +64,6 @@ if res.status_code == 200:
         print(f"✓ New total rows: {len(food_record)}")
     else:
         print("ℹ No new entries to log (all items already recorded or none completed today)")
-else:
-    print(f"✗ Error fetching completions: {res.status_code}")
-    print(f"✗ Response: {res.text} — one completed today")
 else:
     print(f"✗ Error fetching completions: {res.status_code}")
     print(f"✗ Response: {res.text}")
