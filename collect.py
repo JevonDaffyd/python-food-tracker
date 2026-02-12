@@ -24,15 +24,24 @@ print(f"Food record shape: {food_record.shape}")
 
 # --- 2. INGEST TODAY'S COMPLETED ITEMS ---
 print("Checking Todoist for today's completions...")
-url_sync = "https://api.todoist.com/rest/v1/completed/get_all"
+# Sync API v9 endpoint for completed items
+url_sync = "https://api.todoist.com/sync/v9/completed/get_all"
 
-# Use query params for GET request
+# Use since/until to limit to today's completions
+today = datetime.now().date()
+since = f"{today}T00:00:00"
+until = f"{today}T23:59:59"
+
 params = {
-    "project_id": PROJECT_ID,
-    "limit": 50
+    "since": since,
+    "until": until,
+    "project_id": PROJECT_ID,   # optional
+    "limit": 200
 }
 
 res = requests.get(url_sync, headers=headers, params=params)
+print(res.status_code)
+print(res.text[:1000])  # quick preview of response
 
 if res.status_code == 200:
     completed_items = res.json().get('items', [])
