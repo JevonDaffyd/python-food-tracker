@@ -35,10 +35,10 @@ until = f"{today}T23:59:59"
 # Use query params for GET request
 params = {
     "project_id": PROJECT_ID,
-    "limit": 50
+    "limit": 50,
     "since": since,
     "until": until,
-    "project_id": PROJECT_ID,   # optional
+    "project_id": PROJECT_ID,   
     "limit": 200
 }
 
