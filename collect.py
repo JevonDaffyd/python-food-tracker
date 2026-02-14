@@ -55,4 +55,4 @@ if new_entries:
     food_record.to_csv(csv_path, index=False, encoding="utf-8")
     print(f"✅ Successfully updated {csv_path}")
 else:
-    print("ℹ No new items found to log for today.")print("ℹ No new items found to log for today.")
+    print("ℹ No new items found to log for today.")
