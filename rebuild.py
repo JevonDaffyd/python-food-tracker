@@ -285,4 +285,4 @@ for _, row in food_reference.iterrows():
         created_count += 1
     time.sleep(0.18)
 
-print(f"✨ Done. Created {created_count} child tasks under parent {parent_id}.")}.")
+print(f"✨ Done. Created {created_count} child tasks under parent {parent_id}.")
