@@ -119,6 +119,17 @@ except requests.exceptions.RequestException as e:
     print("Response body (if any):", getattr(e, "response", None) and e.response.text)
     raise SystemExit(1)
 
+resp = requests.get(URL_TASKS, headers=HEADERS, params={"project_id": PROJECT_ID}, timeout=30)
+resp.raise_for_status()
+existing_tasks = resp.json()
+
+print("DEBUG: type(existing_tasks) =", type(existing_tasks))
+if isinstance(existing_tasks, list):
+    print("DEBUG: sample item types:", [type(x) for x in existing_tasks[:5]])
+    print("DEBUG: sample items (first 3):", existing_tasks[:3])
+else:
+    print("DEBUG: existing_tasks content (truncated):", str(existing_tasks)[:1000])
+
 # 4b. Delete existing tasks (be careful: this removes active tasks in the project)
 for t in existing_tasks:
     task_id = t.get("id")
