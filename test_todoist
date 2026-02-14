@@ -1,7 +1,0 @@
-import requests
-
-headers = {"Authorization": f"Bearer {TODOIST_TOKEN}"}
-projects = requests.get("https://api.todoist.com/rest/v2/projects", headers=headers).json()
-
-for p in projects:
-    print(f"Name: {p['name']} | Numeric ID: {p['id']}")
