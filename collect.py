@@ -15,25 +15,42 @@ if not TODOIST_TOKEN:
     print("❌ Error: TODOIST_TOKEN not found.")
     exit(1)
 
-# --- 2. ID Translation (The Fix) ---
-api = TodoistAPI(TODOIST_TOKEN)
+# --- 2. Get the HIDDEN Numeric ID (The "Legacy" Fix) ---
+print("Extracting numeric project ID...")
+sync_url = "https://api.todoist.com/sync/v9/sync"
+sync_data = {
+    "resource_types": '["projects"]',
+    "sync_token": "*"
+}
+headers = {"Authorization": f"Bearer {TODOIST_TOKEN}"}
+
 try:
-    project = api.get_project(project_id=ALPHANUMERIC_PROJECT_ID)
-    # This 'project.id' will be the NUMERIC string required by the Sync API
-    NUMERIC_ID = project.id 
-    print(f"✅ Verified Project: {project.name} (Internal ID: {NUMERIC_ID})")
+    sync_res = requests.post(sync_url, headers=headers, data=sync_data)
+    sync_res.raise_for_status()
+    # Find the project that matches your alphanumeric ID
+    projects = sync_res.json().get("projects", [])
+    
+    # We look for the project where the 'id' (numeric) corresponds to your '6fxHrQ58...'
+    # In the Sync API, the 'id' is numeric, but the 'v2_id' is your string '6fxHrQ58...'
+    target_project = next((p for p in projects if p.get("v2_id") == ALPHANUMERIC_PROJECT_ID), None)
+    
+    if not target_project:
+        print(f"❌ Could not find project with v2_id: {ALPHANUMERIC_PROJECT_ID}")
+        exit(1)
+        
+    NUMERIC_ID = target_project["id"]
+    print(f"✅ Found Legacy Numeric ID: {NUMERIC_ID}")
+
 except Exception as e:
-    print(f"❌ Could not verify project ID: {e}")
+    print(f"❌ Failed to map IDs: {e}")
     exit(1)
 
-# --- 3. Fetch Today's Completions (Sync API v9) ---
-SYNC_URL = "https://api.todoist.com/sync/v9/completed/get_all"
-today_start = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
-since_str = today_start.strftime('%Y-%m-%dT%H:%M:%SZ')
-
-headers = {"Authorization": f"Bearer {TODOIST_TOKEN}"}
+# --- 3. Fetch Today's Completions ---
+# Now we use that NUMERIC_ID which the endpoint actually understands
+SYNC_COMPLETED_URL = "https://api.todoist.com/sync/v9/completed/get_all"
+# ... (rest of your params and since_str logic)
 params = {
-    "project_id": NUMERIC_ID,  # We use the translated Numeric ID here
+    "project_id": NUMERIC_ID, 
     "since": since_str,
     "limit": 100
 }
