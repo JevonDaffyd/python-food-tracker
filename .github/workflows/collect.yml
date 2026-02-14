@@ -1,17 +1,25 @@
 name: Collect completions
-#force reregistration
+
 on:
   schedule:
     - cron: "50 22 * * *"  # 22:50 UTC
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   collect:
     runs-on: ubuntu-latest
+    concurrency:
+      group: food-tracker
+      cancel-in-progress: false
 
     steps:
       - name: Check out repo
         uses: actions/checkout@v4
+        with:
+          persist-credentials: true
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -32,7 +40,7 @@ jobs:
       - name: Commit updated CSVs
         run: |
           git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add food_record.csv food_reference.csv || echo "No CSV changes"
-          git commit -m "Update food CSVs [skip ci]" || echo "Nothing to commit"
-          git push
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add food_record.csv food_reference.csv
+          # only commit and push if there are staged changes
+          git diff --staged --quiet || (git commit -m "ci: update food CSVs [skip ci]" && git push)
