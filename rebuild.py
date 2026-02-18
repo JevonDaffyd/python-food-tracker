@@ -258,12 +258,27 @@ for _, row in food_reference.iterrows():
     content = str(row.get('Food', '')).strip()
     if not content:
         continue
+
+    # Format last eaten date
+    last_date_raw = row.get('Last_Date_Eaten')
+    if pd.isna(last_date_raw):
+        last_eaten_str = "Never"
+    else:
+        last_eaten_str = pd.to_datetime(last_date_raw).strftime("%d/%m/%y")
+
+    description = (
+        f"Date last eaten: {last_eaten_str}\n"
+        f"Updated: {datetime.now().strftime('%Y-%m-%d %H:%M')}"
+    )
+
     child_payload = {
         "content": content,
         "project_id": PROJECT_ID,
         "parent_id": parent_id,
-        "priority": int(row.get('Todoist_Priority', 1))
+        "priority": int(row.get('Todoist_Priority', 1)),
+        "description": description
     }
+
     try:
         c_resp = with_retries(lambda: create_task(child_payload), max_attempts=3, base_delay=0.2)
     except requests.exceptions.RequestException as e:
@@ -283,6 +298,7 @@ for _, row in food_reference.iterrows():
         print(f"Warning: create child returned {c_resp.status_code} for '{content}': {c_resp.text}")
     else:
         created_count += 1
+
     time.sleep(0.18)
 
 print(f"✨ Done. Created {created_count} child tasks under parent {parent_id}.")
