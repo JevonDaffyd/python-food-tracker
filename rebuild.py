@@ -89,15 +89,16 @@ if 'Last_Date_Eaten' not in food_reference.columns:
 if 'Total_Count' not in food_reference.columns:
     food_reference['Total_Count'] = 0
 
+print("=== DEBUG: exact Food values around Chocolate in reference ===")
+print(food_reference[food_reference["Food"].str.contains("Chocolate", na=False)])
+
+stats_indexed = stats.set_index('Food')
+
 print("=== DEBUG: Chocolate in stats_indexed? ===")
 print("Chocolate" in stats_indexed.index)
 if "Chocolate" in stats_indexed.index:
     print("Latest_Date from stats:", stats_indexed.loc["Chocolate", "Latest_Date"])
 
-print("=== DEBUG: exact Food values around Chocolate in reference ===")
-print(food_reference[food_reference["Food"].str.contains("Chocolate", na=False)])
-
-stats_indexed = stats.set_index('Food')
 food_reference['Last_Date_Eaten'] = food_reference['Food'].map(
     stats_indexed['Latest_Date']
 ).fillna(food_reference['Last_Date_Eaten'])
