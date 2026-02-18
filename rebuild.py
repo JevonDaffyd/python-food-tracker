@@ -91,10 +91,10 @@ if 'Total_Count' not in food_reference.columns:
 
 stats_indexed = stats.set_index('Food')
 latest = food_reference['Food'].map(stats_indexed['Latest_Date'])
+latest = pd.to_datetime(latest, errors='coerce')
+latest_str = latest.dt.strftime("%Y-%m-%d")
 
-food_reference['Last_Date_Eaten'] = latest.apply(
-    lambda x: x.strftime("%Y-%m-%d") if pd.notna(x) else None
-).fillna(food_reference['Last_Date_Eaten'])
+food_reference['Last_Date_Eaten'] = latest_str.fillna(food_reference['Last_Date_Eaten'])
 
 food_reference['Total_Count'] = food_reference['Food'].map(
     stats_indexed['Count']
