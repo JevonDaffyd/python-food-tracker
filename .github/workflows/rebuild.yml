@@ -1,5 +1,4 @@
 name: Rebuild daily list
-#force reregistration
 on:
   schedule:
     - cron: "10 1 * * *"  # 01:10 UTC
@@ -28,3 +27,11 @@ jobs:
           TODOIST_TOKEN: ${{ secrets.TODOIST_TOKEN }}
         run: |
           python rebuild.py
+
+      - name: Commit updated CSVs
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add *.csv
+          git commit -m "Update CSVs" || echo "No changes to commit"
+          git push
