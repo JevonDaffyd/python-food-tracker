@@ -216,8 +216,23 @@ for task_id in task_ids:
 print(f"Deleted {deleted_count} existing tasks (attempted {len(task_ids)}).")
 
 # 4d. Create parent task (high priority summary)
+
+# Build parent task content based on progress
+if remaining_goal <= 0:
+    # Already hit the 30‑foods target
+    parent_content = (
+        f"Eat some plant foods. You've already had {recent_unique_count} "
+        f"in the last 7 days! ({datetime.now().strftime('%d %b')})"
+    )
+else:
+    # Still below target
+    parent_content = (
+        f"Eat {remaining_goal} plant foods today "
+        f"({datetime.now().strftime('%d %b')})"
+    )
+
 parent_payload = {
-    "content": f"Eat {remaining_goal} plant foods today ({datetime.now().strftime('%d %b')})",
+    "content": parent_content,
     "project_id": PROJECT_ID,
     "due_string": "today",
     "priority": 4
@@ -253,7 +268,6 @@ parent_id = parent_task.get("id")
 if not parent_id:
     print("❌ Parent task created but no id returned:", parent_resp.text)
     raise SystemExit(1)
-
 # 4e. Create child tasks from reference sheet
 created_count = 0
 for _, row in food_reference.iterrows():
@@ -269,7 +283,7 @@ for _, row in food_reference.iterrows():
         last_eaten_str = pd.to_datetime(last_date_raw).strftime("%d/%m/%y")
 
     description = (
-        f"Date last eaten: {last_eaten_str}\n"
+        f"Last eaten: {last_eaten_str}\n"
         f"Updated: {datetime.now().strftime('%Y-%m-%d %H:%M')}"
     )
 
