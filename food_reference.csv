@@ -1,25 +1,12 @@
 Food,Category,Last_Date_Eaten,Days_Since_Eaten,Total_Count,Todoist_Priority
 Potato,Vegetables,2026-02-11,10,55,4
-Peanut,Other,2026-02-15,6,55,4
-Almond,Other,2026-02-15,6,54,4
-Blueberries,Fruit,2026-02-15,6,48,4
-Avocado,Fruit,2026-02-15,6,46,4
 Tomato,Vegetables,2026-02-12,9,41,4
-Sunflower Seed,Other,2026-02-15,6,41,4
-Broccoli,Vegetables,2026-02-15,6,40,4
-Brazil Nut,Other,2026-02-15,6,39,4
-Blackberries,Fruit,2026-02-15,6,39,4
 Mushroom,Vegetables,2026-01-18,34,37,4
-Cherries,Fruit,2026-02-15,6,30,4
-Coconut,Other,2026-02-15,6,29,4
-Grape,Fruit,2026-02-15,6,24,4
 Carrot,Vegetables,2026-01-18,34,22,4
 Popcorn,Other,2026-01-16,36,14,4
-Pecan,Other,2026-02-15,6,12,4
 Cucumber,Vegetables,2025-12-01,82,10,4
 Melon,Fruit,2026-01-03,49,10,4
 Watermelon,Fruit,2026-01-05,47,10,4
-Sweetcorn,Vegetables,2026-02-15,6,10,4
 Kiwi,Fruit,2025-12-06,77,8,4
 Edamame,Other,2026-01-08,44,7,4
 Kidney Bean,Other,2026-01-28,24,7,4
@@ -62,7 +49,20 @@ Quinoa,Other,,999,0,4
 Red cabbage,Vegetables,,999,0,4
 Rocket,Vegetables,,999,0,4
 Rosa verde,Vegetables,,999,0,4
+Peanut,Other,2026-02-15,6,55,3
+Almond,Other,2026-02-15,6,54,3
+Blueberries,Fruit,2026-02-15,6,48,3
+Avocado,Fruit,2026-02-15,6,46,3
+Sunflower Seed,Other,2026-02-15,6,41,3
+Broccoli,Vegetables,2026-02-15,6,40,3
+Brazil Nut,Other,2026-02-15,6,39,3
+Blackberries,Fruit,2026-02-15,6,39,3
 Sweet Potato,Vegetables,2026-02-16,5,33,3
+Cherries,Fruit,2026-02-15,6,30,3
+Coconut,Other,2026-02-15,6,29,3
+Grape,Fruit,2026-02-15,6,24,3
+Pecan,Other,2026-02-15,6,12,3
+Sweetcorn,Vegetables,2026-02-15,6,10,3
 Black Eyed Peas,Other,2026-02-16,5,1,3
 Oats,Other,2026-02-17,4,87,2
 Rice,Other,2026-02-18,3,86,2
