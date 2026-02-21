@@ -105,9 +105,9 @@ food_reference['Days_Since_Eaten'] = (
 ).dt.days.fillna(999).astype(int)
 
 def get_priority(days):
-    if days >= 6:
+    if days >= 7:
         return 4
-    if days == 5:
+    if 5 <= days <= 6:
         return 3
     if 3 <= days <= 4:
         return 2
