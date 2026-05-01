@@ -1,54 +1,51 @@
 Food,Category,Last_Date_Eaten,Days_Since_Eaten,Total_Count,Todoist_Priority
-Rice,Other,2026-04-09,21,89,4
-Avocado,Fruit,2026-02-25,64,48,4
-Strawberries,Fruit,2026-04-20,10,47,4
-Sunflower Seed,Other,2026-04-09,21,46,4
-Onion,Vegetables,2026-03-30,31,42,4
-Blackberries,Fruit,2026-04-20,10,42,4
-Hazelnut,Other,2026-03-30,31,40,4
-Sweet Potato,Vegetables,2026-03-29,32,35,4
-Pepper,Vegetables,2026-03-30,31,34,4
-Cherries,Fruit,2026-03-22,39,32,4
-Haricot Bean,Other,2026-02-28,61,25,4
-Carrot,Vegetables,2026-03-21,40,23,4
-Flaxseed,Other,2026-02-18,71,20,4
-Mango,Fruit,2026-02-18,71,17,4
-Pecan,Other,2026-04-23,7,14,4
-Cucumber,Vegetables,2026-03-21,40,12,4
-Melon,Fruit,2026-01-03,117,10,4
-Watermelon,Fruit,2026-01-05,115,10,4
-Sweetcorn,Vegetables,2026-02-15,74,10,4
-Kidney Bean,Other,2026-03-29,32,9,4
-Kiwi,Fruit,2025-12-06,145,8,4
-Edamame,Other,2026-01-08,112,7,4
-Pinto Beans,Other,2026-03-29,32,7,4
-Lentils,Other,2026-01-28,92,6,4
-Pak Choi,Vegetables,2025-11-13,168,6,4
-Parsnip,Vegetables,2025-12-25,126,6,4
-Cabbage,Vegetables,2026-04-09,21,6,4
-Aubergine,Vegetables,2025-12-20,131,5,4
-Pear,Fruit,2025-07-03,301,5,4
-Chickpea,Other,2026-01-17,103,4,4
-Green Beans,Vegetables,2026-01-10,110,4,4
-Peas,Vegetables,2026-01-01,119,4,4
-Prunes,Fruit,2025-08-14,259,4,4
-Spinach,Vegetables,2026-03-21,40,4,4
-Grapefruit,Fruit,2025-07-02,302,3,4
-Nectarine,Fruit,2025-07-03,301,3,4
-Olive,Vegetables,2025-11-17,164,3,4
-Spring Onion,Vegetables,2025-10-20,192,3,4
-Black Beans,Other,2026-03-29,32,3,4
-Brussels Sprout,Vegetables,2025-12-01,150,2,4
-Courgette,Vegetables,2025-12-20,131,2,4
-Kale,Vegetables,2026-02-01,88,2,4
-Kimchi,Other,2025-04-25,370,2,4
-Beetroot,Vegetables,2025-07-05,299,1,4
-Orange,Fruit,2025-06-28,306,1,4
-Pine Nut,Other,2025-12-13,138,1,4
-Turnip,Vegetables,2026-01-01,119,1,4
-Black Eyed Peas,Other,2026-02-16,73,1,4
-Butternut Squash,Vegetables,2026-02-23,66,1,4
-Dates,Fruit,2026-04-23,7,1,4
+Avocado,Fruit,2026-02-25,65,48,4
+Strawberries,Fruit,2026-04-20,11,47,4
+Sunflower Seed,Other,2026-04-09,22,46,4
+Onion,Vegetables,2026-03-30,32,42,4
+Blackberries,Fruit,2026-04-20,11,42,4
+Hazelnut,Other,2026-03-30,32,40,4
+Sweet Potato,Vegetables,2026-03-29,33,35,4
+Pepper,Vegetables,2026-03-30,32,34,4
+Cherries,Fruit,2026-03-22,40,32,4
+Haricot Bean,Other,2026-02-28,62,25,4
+Carrot,Vegetables,2026-03-21,41,23,4
+Flaxseed,Other,2026-02-18,72,20,4
+Mango,Fruit,2026-02-18,72,17,4
+Cucumber,Vegetables,2026-03-21,41,12,4
+Melon,Fruit,2026-01-03,118,10,4
+Watermelon,Fruit,2026-01-05,116,10,4
+Sweetcorn,Vegetables,2026-02-15,75,10,4
+Kidney Bean,Other,2026-03-29,33,9,4
+Kiwi,Fruit,2025-12-06,146,8,4
+Edamame,Other,2026-01-08,113,7,4
+Pinto Beans,Other,2026-03-29,33,7,4
+Lentils,Other,2026-01-28,93,6,4
+Pak Choi,Vegetables,2025-11-13,169,6,4
+Parsnip,Vegetables,2025-12-25,127,6,4
+Cabbage,Vegetables,2026-04-09,22,6,4
+Aubergine,Vegetables,2025-12-20,132,5,4
+Pear,Fruit,2025-07-03,302,5,4
+Chickpea,Other,2026-01-17,104,4,4
+Green Beans,Vegetables,2026-01-10,111,4,4
+Peas,Vegetables,2026-01-01,120,4,4
+Prunes,Fruit,2025-08-14,260,4,4
+Spinach,Vegetables,2026-03-21,41,4,4
+Grapefruit,Fruit,2025-07-02,303,3,4
+Nectarine,Fruit,2025-07-03,302,3,4
+Olive,Vegetables,2025-11-17,165,3,4
+Spring Onion,Vegetables,2025-10-20,193,3,4
+Black Beans,Other,2026-03-29,33,3,4
+Brussels Sprout,Vegetables,2025-12-01,151,2,4
+Courgette,Vegetables,2025-12-20,132,2,4
+Kale,Vegetables,2026-02-01,89,2,4
+Kimchi,Other,2025-04-25,371,2,4
+Beetroot,Vegetables,2025-07-05,300,1,4
+Orange,Fruit,2025-06-28,307,1,4
+Pine Nut,Other,2025-12-13,139,1,4
+Turnip,Vegetables,2026-01-01,120,1,4
+Black Eyed Peas,Other,2026-02-16,74,1,4
+Butternut Squash,Vegetables,2026-02-23,67,1,4
 Artichoke,Vegetables,,999,0,4
 Beansprouts,Vegetables,,999,0,4
 Cauliflower,Vegetables,,999,0,4
@@ -62,24 +59,27 @@ Quinoa,Other,,999,0,4
 Red cabbage,Vegetables,,999,0,4
 Rocket,Vegetables,,999,0,4
 Rosa verde,Vegetables,,999,0,4
-Brazil Nut,Other,2026-04-25,5,46,3
-Pistachio,Other,2026-04-25,5,37,3
-Oats,Other,2026-04-27,3,99,2
-Peanut,Other,2026-04-27,3,63,2
-Potato,Vegetables,2026-04-26,4,62,2
-Blueberries,Fruit,2026-04-27,3,54,2
-Pumpkin Seed,Other,2026-04-27,3,53,2
-Raspberries,Fruit,2026-04-27,3,48,2
-Tomato,Vegetables,2026-04-27,3,44,2
-Cranberries,Fruit,2026-04-27,3,43,2
-Walnut,Other,2026-04-26,4,39,2
-Mushroom,Vegetables,2026-04-26,4,39,2
-Coconut,Other,2026-04-27,3,36,2
-Coffee,Other,2026-04-29,1,198,1
-Chocolate,Other,2026-04-29,1,162,1
-Almond,Other,2026-04-29,1,59,1
-Banana,Fruit,2026-04-29,1,56,1
-Broccoli,Vegetables,2026-04-29,1,42,1
-Apple,Fruit,2026-04-29,1,33,1
-Grape,Fruit,2026-04-29,1,25,1
-Popcorn,Other,2026-04-29,1,15,1
+Potato,Vegetables,2026-04-26,5,62,3
+Brazil Nut,Other,2026-04-25,6,46,3
+Walnut,Other,2026-04-26,5,39,3
+Mushroom,Vegetables,2026-04-26,5,39,3
+Pistachio,Other,2026-04-25,6,37,3
+Oats,Other,2026-04-27,4,99,2
+Peanut,Other,2026-04-27,4,63,2
+Blueberries,Fruit,2026-04-27,4,54,2
+Pumpkin Seed,Other,2026-04-27,4,53,2
+Raspberries,Fruit,2026-04-27,4,48,2
+Tomato,Vegetables,2026-04-27,4,44,2
+Cranberries,Fruit,2026-04-27,4,43,2
+Coconut,Other,2026-04-27,4,36,2
+Coffee,Other,2026-04-29,2,198,1
+Chocolate,Other,2026-04-29,2,162,1
+Rice,Other,2026-04-30,1,90,1
+Almond,Other,2026-04-29,2,59,1
+Banana,Fruit,2026-04-29,2,56,1
+Broccoli,Vegetables,2026-04-29,2,42,1
+Apple,Fruit,2026-04-29,2,33,1
+Grape,Fruit,2026-04-29,2,25,1
+Pecan,Other,2026-04-30,1,15,1
+Popcorn,Other,2026-04-29,2,15,1
+Dates,Fruit,2026-04-30,1,2,1
