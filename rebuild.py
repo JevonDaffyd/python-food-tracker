@@ -6,13 +6,14 @@ Rebuild Todoist project from local CSVs (safe, robust, /api/v1 endpoints).
 - Uses BASE_DIR for CSV paths.
 - Handles 410 API_DEPRECATED and surfaces error_extra.
 - Adds small retry/backoff for create/delete operations.
+- Generates 30-day performance chart showing daily unique food counts.
 """
 import os
 import time
 import json
 import requests
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, timedelta
 
 # --- Config ---
 TODOIST_TOKEN = os.environ.get("TODOIST_TOKEN")
@@ -26,6 +27,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 CSV_FOOD_RECORD = os.path.join(BASE_DIR, "food_record.csv")
 CSV_FOOD_REFERENCE = os.path.join(BASE_DIR, "food_reference.csv")
+CHART_PATH = os.path.join(BASE_DIR, "performance_chart.html")
 
 HEADERS = {
     "Authorization": f"Bearer {TODOIST_TOKEN}",
@@ -48,6 +50,227 @@ def with_retries(func, max_attempts=4, base_delay=0.5, *args, **kwargs):
             delay = base_delay * (2 ** (attempt - 1))
             print(f"Transient error: {e}. Retrying in {delay:.1f}s (attempt {attempt}/{max_attempts})...")
             time.sleep(delay)
+
+
+def generate_performance_chart(food_record_df):
+    """Generate 30-day performance chart HTML with daily unique food counts."""
+    print("Generating performance chart...")
+    
+    # Convert Date to datetime and get last 30 days
+    today = pd.Timestamp.now().normalize()
+    thirty_days_ago = today - pd.Timedelta(days=29)  # 30 days inclusive
+    
+    food_record_df['Date'] = pd.to_datetime(food_record_df['Date'], errors='coerce')
+    recent_df = food_record_df[food_record_df['Date'] >= thirty_days_ago].copy()
+    
+    # Calculate unique foods per day
+    daily_counts = recent_df.groupby('Date')['Food'].nunique().reset_index()
+    daily_counts.columns = ['Date', 'Count']
+    daily_counts = daily_counts.sort_values('Date')
+    
+    # Create complete date range (fill in missing dates with 0)
+    date_range = pd.date_range(start=thirty_days_ago, end=today, freq='D')
+    daily_counts_full = daily_counts.set_index('Date').reindex(date_range, fill_value=0).reset_index()
+    daily_counts_full.columns = ['Date', 'Count']
+    
+    # Format for chart
+    dates = [d.strftime('%Y-%m-%d') for d in daily_counts_full['Date']]
+    counts = daily_counts_full['Count'].tolist()
+    
+    start_date = dates[0]
+    end_date = dates[-1]
+    
+    # Generate HTML with Chart.js
+    html_content = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food Tracker - 30 Day Performance</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {{
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;
+            background: #f5f5f5;
+            padding: 16px;
+            margin: 0;
+        }}
+        .container {{
+            max-width: 100%;
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }}
+        h1 {{
+            margin: 0 0 8px 0;
+            font-size: 24px;
+            color: #333;
+        }}
+        .subtitle {{
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }}
+        #chartContainer {{
+            position: relative;
+            height: 400px;
+            margin-bottom: 20px;
+        }}
+        .stats {{
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 20px;
+        }}
+        .stat-box {{
+            background: #f9f9f9;
+            padding: 12px;
+            border-radius: 6px;
+            border-left: 4px solid #4CAF50;
+        }}
+        .stat-label {{
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+            font-weight: 600;
+        }}
+        .stat-value {{
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin-top: 4px;
+        }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🥗 Food Tracker Performance</h1>
+        <p class="subtitle">30-day daily unique food count ({start_date} to {end_date})</p>
+        
+        <div id="chartContainer">
+            <canvas id="performanceChart"></canvas>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-box">
+                <div class="stat-label">Today's Count</div>
+                <div class="stat-value">{counts[-1]} foods</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">30-Day Average</div>
+                <div class="stat-value">{sum(counts)/len(counts):.1f} foods</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Best Day</div>
+                <div class="stat-value">{max(counts)} foods</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Days Above 30</div>
+                <div class="stat-value">{sum(1 for c in counts if c >= 30)} days</div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const ctx = document.getElementById('performanceChart').getContext('2d');
+        const chart = new Chart(ctx, {{
+            type: 'line',
+            data: {{
+                labels: {json.dumps(dates)},
+                datasets: [
+                    {{
+                        label: 'Daily Unique Foods',
+                        data: {json.dumps(counts)},
+                        borderColor: '#4CAF50',
+                        backgroundColor: 'rgba(76, 175, 80, 0.08)',
+                        borderWidth: 2.5,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#4CAF50',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointHoverRadius: 6
+                    }},
+                    {{
+                        label: 'Target (30 foods)',
+                        data: Array({len(dates)}).fill(30),
+                        borderColor: '#FF9800',
+                        borderWidth: 2,
+                        borderDash: [5, 5],
+                        fill: false,
+                        pointRadius: 0,
+                        pointHoverRadius: 0,
+                        tension: 0
+                    }}
+                ]
+            }},
+            options: {{
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {{
+                    legend: {{
+                        display: true,
+                        position: 'top',
+                        labels: {{
+                            font: {{ size: 12 }},
+                            padding: 12
+                        }}
+                    }},
+                    tooltip: {{
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        padding: 10,
+                        titleFont: {{ size: 13, weight: 'bold' }},
+                        bodyFont: {{ size: 12 }},
+                        callbacks: {{
+                            afterLabel: function(context) {{
+                                if (context.datasetIndex === 0) {{
+                                    const value = context.parsed.y;
+                                    return value >= 30 ? '✓ Goal met!' : (30 - value) + ' to goal';
+                                }}
+                                return '';
+                            }}
+                        }}
+                    }}
+                }},
+                scales: {{
+                    x: {{
+                        grid: {{ display: false }},
+                        ticks: {{
+                            font: {{ size: 11 }},
+                            maxTicksLimit: 2,
+                            callback: function(index, ticks) {{
+                                if (index === 0 || index === ticks.length - 1) {{
+                                    return this.getLabelForValue(index);
+                                }}
+                                return '';
+                            }}
+                        }}
+                    }},
+                    y: {{
+                        beginAtZero: true,
+                        max: Math.max(...{json.dumps(counts)}, 30) + 5,
+                        ticks: {{
+                            font: {{ size: 11 }},
+                            stepSize: 5
+                        }},
+                        grid: {{
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        }}
+                    }}
+                }}
+            }}
+        }});
+    </script>
+</body>
+</html>"""
+    
+    with open(CHART_PATH, 'w', encoding='utf-8') as f:
+        f.write(html_content)
+    
+    print(f"✅ Chart generated: {CHART_PATH}")
+
 
 # --- 1. LOAD DATA (scheduled before midnight) ---
 print("Loading CSV data...")
@@ -120,6 +343,9 @@ food_reference = food_reference.sort_values(by=['Todoist_Priority', 'Total_Count
 food_record.to_csv(CSV_FOOD_RECORD, index=False)
 food_reference.to_csv(CSV_FOOD_REFERENCE, index=False)
 print("Local CSVs updated.")
+
+# --- 3b. GENERATE PERFORMANCE CHART ---
+generate_performance_chart(food_record)
 
 # --- 4. REBUILD TODOIST PROJECT (use /api/v1 endpoints) ---
 print("Cleaning and rebuilding Todoist project...")
@@ -222,13 +448,15 @@ if remaining_goal <= 0:
     # Already hit the 30‑foods target
     parent_content = (
         f"Eat some plant foods. You've already had {recent_unique_count} "
-        f"in the last 7 days! ({datetime.now().strftime('%d %b')})"
+        f"in the last 7 days! ({datetime.now().strftime('%d %b')})\n\n"
+        f"📊 [View 30-day performance](https://github.com/JevonDaffyd/python-food-tracker/raw/main/performance_chart.html)"
     )
 else:
     # Still below target
     parent_content = (
         f"Eat {remaining_goal} plant foods today "
-        f"({datetime.now().strftime('%d %b')})"
+        f"({datetime.now().strftime('%d %b')})\n\n"
+        f"📊 [View 30-day performance](https://github.com/JevonDaffyd/python-food-tracker/raw/main/performance_chart.html)"
     )
 
 parent_payload = {
