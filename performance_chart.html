@@ -1,282 +1,232 @@
-### Updated HTML with rolling 7‑day unique count
-
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Food Tracker - 30 Day Performance (Rolling 7 Day Unique)</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;
-            background: #f5f5f5;
-            padding: 16px;
-            margin: 0;
-        }
-        .container {
-            max-width: 100%;
-            background: white;
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        h1 {
-            margin: 0 0 8px 0;
-            font-size: 24px;
-            color: #333;
-        }
-        .subtitle {
-            color: #666;
-            font-size: 14px;
-            margin-bottom: 20px;
-        }
-        #chartContainer {
-            position: relative;
-            height: 400px;
-            margin-bottom: 20px;
-        }
-        .stats {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-top: 20px;
-        }
-        .stat-box {
-            background: #f9f9f9;
-            padding: 12px;
-            border-radius: 6px;
-            border-left: 4px solid #4CAF50;
-        }
-        .stat-label {
-            font-size: 12px;
-            color: #666;
-            text-transform: uppercase;
-            font-weight: 600;
-        }
-        .stat-value {
-            font-size: 24px;
-            font-weight: bold;
-            color: #333;
-            margin-top: 4px;
-        }
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Food Tracker - Rolling 7 Day Unique</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { font-family: -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Ubuntu,sans-serif; background:#f5f5f5; padding:16px; margin:0; }
+    .container { max-width:100%; background:#fff; border-radius:8px; padding:20px; box-shadow:0 2px 8px rgba(0,0,0,0.08); }
+    h1 { margin:0 0 8px 0; font-size:24px; color:#333; }
+    .subtitle { color:#666; font-size:14px; margin-bottom:20px; }
+    #chartContainer { position:relative; height:400px; margin-bottom:20px; }
+    .stats { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:20px; }
+    .stat-box { background:#f9f9f9; padding:12px; border-radius:6px; border-left:4px solid #4CAF50; }
+    .stat-label { font-size:12px; color:#666; text-transform:uppercase; font-weight:600; }
+    .stat-value { font-size:24px; font-weight:bold; color:#333; margin-top:4px; }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🥗 Food Tracker Performance</h1>
-        <p class="subtitle">30-day daily unique food count (2026-05-08 to 2026-06-06) — includes rolling 7-day unique series</p>
-        
-        <div id="chartContainer">
-            <canvas id="performanceChart"></canvas>
-        </div>
-        
-        <div class="stats">
-            <div class="stat-box">
-                <div class="stat-label">Today's 7‑Day Unique Count</div>
-                <div id="todaysCount" class="stat-value">0 foods</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-label">30-Day Average (daily)</div>
-                <div id="avg30" class="stat-value">0 foods</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-label">Best Day (daily)</div>
-                <div id="bestDay" class="stat-value">0 foods</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-label">Days Above 30 (daily)</div>
-                <div id="daysAbove30" class="stat-value">0 days</div>
-            </div>
-        </div>
+  <div class="container">
+    <h1>🥗 Food Tracker Performance</h1>
+    <p class="subtitle">30‑day view with rolling 7‑day unique counts (from food_record.csv)</p>
+
+    <div id="chartContainer"><canvas id="performanceChart"></canvas></div>
+
+    <div class="stats">
+      <div class="stat-box">
+        <div class="stat-label">Today's 7‑Day Unique Count</div>
+        <div id="todaysCount" class="stat-value">0 foods</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">30‑Day Average (daily)</div>
+        <div id="avg30" class="stat-value">0 foods</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Best Day (daily)</div>
+        <div id="bestDay" class="stat-value">0 foods</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Days Above 30 (daily)</div>
+        <div id="daysAbove30" class="stat-value">0 days</div>
+      </div>
     </div>
-    
-    <script>
-        // Labels and daily unique counts (these match the original example)
-        const labels = ["2026-05-08","2026-05-09","2026-05-10","2026-05-11","2026-05-12","2026-05-13","2026-05-14","2026-05-15","2026-05-16","2026-05-17","2026-05-18","2026-05-19","2026-05-20","2026-05-21","2026-05-22","2026-05-23","2026-05-24","2026-05-25","2026-05-26","2026-05-27","2026-05-28","2026-05-29","2026-05-30","2026-05-31","2026-06-01","2026-06-02","2026-06-03","2026-06-04","2026-06-05","2026-06-06"];
+  </div>
 
-        // Example: dailyFoods is an array of arrays (each inner array lists the foods eaten that day).
-        // Replace these sample arrays with your real per-day food items for accurate rolling-unique results.
-        const dailyFoods = [
-            ["apple","banana","oats","eggs","spinach","coffee"], //6
-            ["banana","yogurt"], //2
-            ["salad","chicken","rice","apple"], //4
-            [], //0
-            [], //0
-            ["pasta","tomato","basil","cheese","olive oil","garlic","lettuce","cucumber","dressing"], //9
-            [], //0
-            [], //0
-            [], //0
-            ["salmon","rice","broccoli","lemon","butter"], //5
-            ["steak","potato","salad","wine","bread","butter","garlic","herbs"], //8
-            ["oatmeal","berries","almonds","honey","milk"], //5
-            [],[],[],[], // 13-16 zeros
-            [], //17
-            ["tofu","noodles","soy sauce","scallion"], //18 -> 4
-            [], //19
-            ["tacos","salsa","lettuce","cheese","beans","rice","guac","lime"], //20 -> 8
-            [],[], //21-22
-            ["soup","bread","cheese"], //23 -> 3
-            ["apple","tea"], //24 -> 2
-            ["burger","fries","shake","salad","pickle","onion","tomato","cheese","bun","ketchup","mustard","lettuce","patty","sauce","chips"], //25 -> 15
-            [],[],[], //26-28 zeros
-            ["pancakes","maple syrup","butter","berries","yogurt","coffee","orange juice"] //29 -> 7
-        ];
+  <script>
+  /************************************************************************
+   * This page fetches food_record.csv from the same folder as the HTML.
+   * It expects CSV rows: Date,Food,Category
+   * It computes daily unique counts and a rolling 7-day unique count.
+   *
+   * To use: place this HTML and food_record.csv in the same repo/folder
+   * (GitHub Pages will serve the CSV at the same relative path).
+   ************************************************************************/
 
-        // Fallback: if dailyFoods length doesn't match labels length, pad with empty arrays
-        while (dailyFoods.length < labels.length) dailyFoods.push([]);
+  // --- Set the CSV path relative to this HTML file (same folder) ---
+  const csvUrl = 'food_record.csv';
+  const csvText = ''; // leave empty when using csvUrl
 
-        // Compute daily unique counts (just the length of each day's unique set)
-        const dailyUniqueCounts = dailyFoods.map(arr => new Set(arr).size);
+  // ---------- Helpers ----------
+  function parseCSV(text) {
+    const lines = text.trim().split(/\r?\n/);
+    if (lines.length < 2) return [];
+    const header = lines[0].split(',').map(h => h.trim().toLowerCase());
+    const dateIdx = header.findIndex(h => h.includes('date'));
+    const foodIdx = header.findIndex(h => h.includes('food'));
+    if (dateIdx === -1 || foodIdx === -1) return [];
+    const out = [];
+    for (let i = 1; i < lines.length; i++) {
+      const cols = lines[i].split(',');
+      const date = (cols[dateIdx] || '').trim();
+      const food = (cols[foodIdx] || '').trim();
+      if (!date || !food) continue;
+      out.push({ date: date.slice(0,10), food: food.trim() });
+    }
+    return out;
+  }
 
-        // Compute rolling 7-day unique counts (unique foods across the last 7 days ending on each day)
-        function computeRollingUnique(dailyFoodsArr, windowSize = 7) {
-            const rolling = [];
-            for (let i = 0; i < dailyFoodsArr.length; i++) {
-                const start = Math.max(0, i - windowSize + 1);
-                const s = new Set();
-                for (let j = start; j <= i; j++) {
-                    dailyFoodsArr[j].forEach(item => s.add(item));
+  function buildDateRange(startISO, endISO) {
+    const out = [];
+    let cur = new Date(startISO + 'T00:00:00');
+    const end = new Date(endISO + 'T00:00:00');
+    while (cur <= end) {
+      out.push(cur.toISOString().slice(0,10));
+      cur.setDate(cur.getDate() + 1);
+    }
+    return out;
+  }
+
+  function computeRollingUnique(arrOfArrays, windowSize = 7) {
+    const rolling = [];
+    for (let i = 0; i < arrOfArrays.length; i++) {
+      const startIdx = Math.max(0, i - windowSize + 1);
+      const s = new Set();
+      for (let j = startIdx; j <= i; j++) {
+        (arrOfArrays[j] || []).forEach(f => s.add(f));
+      }
+      rolling.push(s.size);
+    }
+    return rolling;
+  }
+
+  // ---------- Main flow ----------
+  (async function main() {
+    let text = csvText;
+    if (csvUrl) {
+      try {
+        const res = await fetch(csvUrl);
+        if (!res.ok) throw new Error('Failed to fetch CSV: ' + res.status);
+        text = await res.text();
+      } catch (e) {
+        console.error('CSV fetch failed:', e);
+        // If fetch fails and csvText is empty, stop with an error message in the stats
+        document.getElementById('todaysCount').textContent = 'CSV load error';
+        return;
+      }
+    }
+
+    const entries = parseCSV(text);
+
+    // determine max date in entries (or today)
+    let maxDate = null;
+    entries.forEach(e => {
+      if (!maxDate || e.date > maxDate) maxDate = e.date;
+    });
+    if (!maxDate) {
+      const t = new Date();
+      maxDate = t.toISOString().slice(0,10);
+    }
+
+    // 30-day window ending at maxDate
+    const end = new Date(maxDate + 'T00:00:00');
+    const start = new Date(end);
+    start.setDate(start.getDate() - 29);
+    const labels = buildDateRange(start.toISOString().slice(0,10), maxDate);
+
+    // aggregate foods by date (use Set to dedupe same-day duplicates)
+    const foodsByDate = new Map();
+    labels.forEach(d => foodsByDate.set(d, new Set()));
+    entries.forEach(({date, food}) => {
+      if (!date || !food) return;
+      if (!foodsByDate.has(date)) foodsByDate.set(date, new Set());
+      foodsByDate.get(date).add(food);
+    });
+
+    const dailyFoodsArr = labels.map(d => Array.from(foodsByDate.get(d) || []));
+    const dailyUniqueCounts = dailyFoodsArr.map(arr => new Set(arr).size);
+    const rolling7Unique = computeRollingUnique(dailyFoodsArr, 7);
+
+    // stats
+    const lastIndex = rolling7Unique.length - 1;
+    const todayRolling = lastIndex >= 0 ? rolling7Unique[lastIndex] : 0;
+    const avg30 = dailyUniqueCounts.length ? (dailyUniqueCounts.reduce((a,b)=>a+b,0) / dailyUniqueCounts.length) : 0;
+    const bestDay = dailyUniqueCounts.length ? Math.max(...dailyUniqueCounts) : 0;
+    const daysAbove30 = dailyUniqueCounts.filter(v => v >= 30).length;
+
+    document.getElementById('todaysCount').textContent = `${todayRolling} foods`;
+    document.getElementById('avg30').textContent = `${avg30.toFixed(1)} foods`;
+    document.getElementById('bestDay').textContent = `${bestDay} foods`;
+    document.getElementById('daysAbove30').textContent = `${daysAbove30} days`;
+
+    // chart
+    const ctx = document.getElementById('performanceChart').getContext('2d');
+    const maxDataValue = Math.max(...dailyUniqueCounts, ...rolling7Unique, 30);
+    const yMax = Math.ceil((maxDataValue + 5) / 5) * 5;
+
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: 'Daily Unique Foods',
+            data: dailyUniqueCounts,
+            borderColor: '#4CAF50',
+            backgroundColor: 'rgba(76,175,80,0.08)',
+            borderWidth: 2.5,
+            fill: true,
+            tension: 0.4,
+            pointRadius: 4
+          },
+          {
+            label: 'Rolling 7‑Day Unique Foods',
+            data: rolling7Unique,
+            borderColor: '#2196F3',
+            backgroundColor: 'rgba(33,150,243,0.06)',
+            borderWidth: 2,
+            fill: false,
+            tension: 0.4,
+            pointRadius: 3
+          },
+          {
+            label: 'Target (30 foods)',
+            data: Array(labels.length).fill(30),
+            borderColor: '#FF9800',
+            borderWidth: 2,
+            borderDash: [5,5],
+            fill: false,
+            pointRadius: 0
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'top' },
+          tooltip: {
+            callbacks: {
+              label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y}`,
+              afterBody: ctx => {
+                if (ctx[0].dataset.label === 'Rolling 7‑Day Unique Foods') {
+                  const val = ctx[0].parsed.y;
+                  return val >= 30 ? '✓ Goal met (7-day)!' : `${30 - val} to 30 (7-day)`;
                 }
-                rolling.push(s.size);
+                return '';
+              }
             }
-            return rolling;
+          }
+        },
+        scales: {
+          x: { ticks: { maxTicksLimit: 8 } },
+          y: { beginAtZero: true, max: yMax, ticks: { stepSize: 5 } }
         }
-
-        const rolling7Unique = computeRollingUnique(dailyFoods, 7);
-
-        // Stats
-        const todayRolling = rolling7Unique[rolling7Unique.length - 1] || 0;
-        const avg30 = (dailyUniqueCounts.reduce((a,b)=>a+b,0) / dailyUniqueCounts.length) || 0;
-        const bestDay = Math.max(...dailyUniqueCounts, 0);
-        const daysAbove30 = dailyUniqueCounts.filter(v => v >= 30).length;
-
-        // Update stat boxes
-        document.getElementById('todaysCount').textContent = `${todayRolling} foods`;
-        document.getElementById('avg30').textContent = `${avg30.toFixed(1)} foods`;
-        document.getElementById('bestDay').textContent = `${bestDay} foods`;
-        document.getElementById('daysAbove30').textContent = `${daysAbove30} days`;
-
-        // Chart: show both daily unique and rolling 7-day unique for clarity
-        const ctx = document.getElementById('performanceChart').getContext('2d');
-
-        // Determine y-axis max from both series and the target
-        const maxDataValue = Math.max(...dailyUniqueCounts, ...rolling7Unique, 30);
-        const yMax = Math.ceil((maxDataValue + 5) / 5) * 5;
-
-        const chart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [
-                    {
-                        label: 'Daily Unique Foods',
-                        data: dailyUniqueCounts,
-                        borderColor: '#4CAF50',
-                        backgroundColor: 'rgba(76, 175, 80, 0.08)',
-                        borderWidth: 2.5,
-                        fill: true,
-                        tension: 0.4,
-                        pointRadius: 4,
-                        pointBackgroundColor: '#4CAF50',
-                        pointBorderColor: '#fff',
-                        pointBorderWidth: 2,
-                        pointHoverRadius: 6
-                    },
-                    {
-                        label: 'Rolling 7‑Day Unique Foods',
-                        data: rolling7Unique,
-                        borderColor: '#2196F3',
-                        backgroundColor: 'rgba(33, 150, 243, 0.06)',
-                        borderWidth: 2,
-                        fill: false,
-                        tension: 0.4,
-                        pointRadius: 3,
-                        pointBackgroundColor: '#2196F3',
-                        pointBorderColor: '#fff',
-                        pointBorderWidth: 1,
-                        pointHoverRadius: 5
-                    },
-                    {
-                        label: 'Target (30 foods)',
-                        data: Array(labels.length).fill(30),
-                        borderColor: '#FF9800',
-                        borderWidth: 2,
-                        borderDash: [5, 5],
-                        fill: false,
-                        pointRadius: 0,
-                        pointHoverRadius: 0,
-                        tension: 0
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: true,
-                        position: 'top',
-                        labels: {
-                            font: { size: 12 },
-                            padding: 12
-                        }
-                    },
-                    tooltip: {
-                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                        padding: 10,
-                        titleFont: { size: 13, weight: 'bold' },
-                        bodyFont: { size: 12 },
-                        callbacks: {
-                            label: function(context) {
-                                const label = context.dataset.label || '';
-                                const value = context.parsed.y;
-                                return `${label}: ${value}`;
-                            },
-                            afterBody: function(context) {
-                                // If the tooltip is for the rolling series, show how many to reach 30
-                                const dsIndex = context[0].datasetIndex;
-                                if (dsIndex === 1) { // rolling series index
-                                    const val = context[0].parsed.y;
-                                    return val >= 30 ? '✓ Goal met (7-day)!' : `${30 - val} to 30 (7-day)`;
-                                }
-                                return '';
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    x: {
-                        grid: { display: false },
-                        ticks: {
-                            font: { size: 11 },
-                            maxTicksLimit: 6,
-                            callback: function(index, ticks) {
-                                if (index === 0 || index === ticks.length - 1) {
-                                    return this.getLabelForValue(index);
-                                }
-                                // show every 5th label for readability
-                                if (index % 5 === 0) return this.getLabelForValue(index);
-                                return '';
-                            }
-                        }
-                    },
-                    y: {
-                        beginAtZero: true,
-                        max: yMax,
-                        ticks: {
-                            font: { size: 11 },
-                            stepSize: 5
-                        },
-                        grid: {
-                            color: 'rgba(0, 0, 0, 0.05)'
-                        }
-                    }
-                }
-            }
-        });
-    </script>
+      }
+    });
+  })();
+  </script>
 </body>
 </html>
-```
+
