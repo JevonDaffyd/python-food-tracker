@@ -1,9 +1,12 @@
+### Updated HTML with rolling 7‑day unique count
+
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Food Tracker - 30 Day Performance</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Food Tracker - 30 Day Performance (Rolling 7 Day Unique)</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
@@ -63,7 +66,7 @@
 <body>
     <div class="container">
         <h1>🥗 Food Tracker Performance</h1>
-        <p class="subtitle">30-day daily unique food count (2026-05-08 to 2026-06-06)</p>
+        <p class="subtitle">30-day daily unique food count (2026-05-08 to 2026-06-06) — includes rolling 7-day unique series</p>
         
         <div id="chartContainer">
             <canvas id="performanceChart"></canvas>
@@ -71,34 +74,105 @@
         
         <div class="stats">
             <div class="stat-box">
-                <div class="stat-label">Today's Count</div>
-                <div class="stat-value">0 foods</div>
+                <div class="stat-label">Today's 7‑Day Unique Count</div>
+                <div id="todaysCount" class="stat-value">0 foods</div>
             </div>
             <div class="stat-box">
-                <div class="stat-label">30-Day Average</div>
-                <div class="stat-value">2.6 foods</div>
+                <div class="stat-label">30-Day Average (daily)</div>
+                <div id="avg30" class="stat-value">0 foods</div>
             </div>
             <div class="stat-box">
-                <div class="stat-label">Best Day</div>
-                <div class="stat-value">15 foods</div>
+                <div class="stat-label">Best Day (daily)</div>
+                <div id="bestDay" class="stat-value">0 foods</div>
             </div>
             <div class="stat-box">
-                <div class="stat-label">Days Above 30</div>
-                <div class="stat-value">0 days</div>
+                <div class="stat-label">Days Above 30 (daily)</div>
+                <div id="daysAbove30" class="stat-value">0 days</div>
             </div>
         </div>
     </div>
     
     <script>
+        // Labels and daily unique counts (these match the original example)
+        const labels = ["2026-05-08","2026-05-09","2026-05-10","2026-05-11","2026-05-12","2026-05-13","2026-05-14","2026-05-15","2026-05-16","2026-05-17","2026-05-18","2026-05-19","2026-05-20","2026-05-21","2026-05-22","2026-05-23","2026-05-24","2026-05-25","2026-05-26","2026-05-27","2026-05-28","2026-05-29","2026-05-30","2026-05-31","2026-06-01","2026-06-02","2026-06-03","2026-06-04","2026-06-05","2026-06-06"];
+
+        // Example: dailyFoods is an array of arrays (each inner array lists the foods eaten that day).
+        // Replace these sample arrays with your real per-day food items for accurate rolling-unique results.
+        const dailyFoods = [
+            ["apple","banana","oats","eggs","spinach","coffee"], //6
+            ["banana","yogurt"], //2
+            ["salad","chicken","rice","apple"], //4
+            [], //0
+            [], //0
+            ["pasta","tomato","basil","cheese","olive oil","garlic","lettuce","cucumber","dressing"], //9
+            [], //0
+            [], //0
+            [], //0
+            ["salmon","rice","broccoli","lemon","butter"], //5
+            ["steak","potato","salad","wine","bread","butter","garlic","herbs"], //8
+            ["oatmeal","berries","almonds","honey","milk"], //5
+            [],[],[],[], // 13-16 zeros
+            [], //17
+            ["tofu","noodles","soy sauce","scallion"], //18 -> 4
+            [], //19
+            ["tacos","salsa","lettuce","cheese","beans","rice","guac","lime"], //20 -> 8
+            [],[], //21-22
+            ["soup","bread","cheese"], //23 -> 3
+            ["apple","tea"], //24 -> 2
+            ["burger","fries","shake","salad","pickle","onion","tomato","cheese","bun","ketchup","mustard","lettuce","patty","sauce","chips"], //25 -> 15
+            [],[],[], //26-28 zeros
+            ["pancakes","maple syrup","butter","berries","yogurt","coffee","orange juice"] //29 -> 7
+        ];
+
+        // Fallback: if dailyFoods length doesn't match labels length, pad with empty arrays
+        while (dailyFoods.length < labels.length) dailyFoods.push([]);
+
+        // Compute daily unique counts (just the length of each day's unique set)
+        const dailyUniqueCounts = dailyFoods.map(arr => new Set(arr).size);
+
+        // Compute rolling 7-day unique counts (unique foods across the last 7 days ending on each day)
+        function computeRollingUnique(dailyFoodsArr, windowSize = 7) {
+            const rolling = [];
+            for (let i = 0; i < dailyFoodsArr.length; i++) {
+                const start = Math.max(0, i - windowSize + 1);
+                const s = new Set();
+                for (let j = start; j <= i; j++) {
+                    dailyFoodsArr[j].forEach(item => s.add(item));
+                }
+                rolling.push(s.size);
+            }
+            return rolling;
+        }
+
+        const rolling7Unique = computeRollingUnique(dailyFoods, 7);
+
+        // Stats
+        const todayRolling = rolling7Unique[rolling7Unique.length - 1] || 0;
+        const avg30 = (dailyUniqueCounts.reduce((a,b)=>a+b,0) / dailyUniqueCounts.length) || 0;
+        const bestDay = Math.max(...dailyUniqueCounts, 0);
+        const daysAbove30 = dailyUniqueCounts.filter(v => v >= 30).length;
+
+        // Update stat boxes
+        document.getElementById('todaysCount').textContent = `${todayRolling} foods`;
+        document.getElementById('avg30').textContent = `${avg30.toFixed(1)} foods`;
+        document.getElementById('bestDay').textContent = `${bestDay} foods`;
+        document.getElementById('daysAbove30').textContent = `${daysAbove30} days`;
+
+        // Chart: show both daily unique and rolling 7-day unique for clarity
         const ctx = document.getElementById('performanceChart').getContext('2d');
+
+        // Determine y-axis max from both series and the target
+        const maxDataValue = Math.max(...dailyUniqueCounts, ...rolling7Unique, 30);
+        const yMax = Math.ceil((maxDataValue + 5) / 5) * 5;
+
         const chart = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: ["2026-05-08", "2026-05-09", "2026-05-10", "2026-05-11", "2026-05-12", "2026-05-13", "2026-05-14", "2026-05-15", "2026-05-16", "2026-05-17", "2026-05-18", "2026-05-19", "2026-05-20", "2026-05-21", "2026-05-22", "2026-05-23", "2026-05-24", "2026-05-25", "2026-05-26", "2026-05-27", "2026-05-28", "2026-05-29", "2026-05-30", "2026-05-31", "2026-06-01", "2026-06-02", "2026-06-03", "2026-06-04", "2026-06-05", "2026-06-06"],
+                labels: labels,
                 datasets: [
                     {
                         label: 'Daily Unique Foods',
-                        data: [6, 2, 4, 0, 0, 9, 0, 0, 0, 5, 8, 5, 0, 0, 0, 0, 0, 4, 0, 8, 0, 0, 3, 2, 15, 0, 0, 0, 7, 0],
+                        data: dailyUniqueCounts,
                         borderColor: '#4CAF50',
                         backgroundColor: 'rgba(76, 175, 80, 0.08)',
                         borderWidth: 2.5,
@@ -111,8 +185,22 @@
                         pointHoverRadius: 6
                     },
                     {
+                        label: 'Rolling 7‑Day Unique Foods',
+                        data: rolling7Unique,
+                        borderColor: '#2196F3',
+                        backgroundColor: 'rgba(33, 150, 243, 0.06)',
+                        borderWidth: 2,
+                        fill: false,
+                        tension: 0.4,
+                        pointRadius: 3,
+                        pointBackgroundColor: '#2196F3',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 1,
+                        pointHoverRadius: 5
+                    },
+                    {
                         label: 'Target (30 foods)',
-                        data: Array(30).fill(30),
+                        data: Array(labels.length).fill(30),
                         borderColor: '#FF9800',
                         borderWidth: 2,
                         borderDash: [5, 5],
@@ -141,10 +229,17 @@
                         titleFont: { size: 13, weight: 'bold' },
                         bodyFont: { size: 12 },
                         callbacks: {
-                            afterLabel: function(context) {
-                                if (context.datasetIndex === 0) {
-                                    const value = context.parsed.y;
-                                    return value >= 30 ? '✓ Goal met!' : (30 - value) + ' to goal';
+                            label: function(context) {
+                                const label = context.dataset.label || '';
+                                const value = context.parsed.y;
+                                return `${label}: ${value}`;
+                            },
+                            afterBody: function(context) {
+                                // If the tooltip is for the rolling series, show how many to reach 30
+                                const dsIndex = context[0].datasetIndex;
+                                if (dsIndex === 1) { // rolling series index
+                                    const val = context[0].parsed.y;
+                                    return val >= 30 ? '✓ Goal met (7-day)!' : `${30 - val} to 30 (7-day)`;
                                 }
                                 return '';
                             }
@@ -156,18 +251,20 @@
                         grid: { display: false },
                         ticks: {
                             font: { size: 11 },
-                            maxTicksLimit: 2,
+                            maxTicksLimit: 6,
                             callback: function(index, ticks) {
                                 if (index === 0 || index === ticks.length - 1) {
                                     return this.getLabelForValue(index);
                                 }
+                                // show every 5th label for readability
+                                if (index % 5 === 0) return this.getLabelForValue(index);
                                 return '';
                             }
                         }
                     },
                     y: {
                         beginAtZero: true,
-                        max: Math.max(...[6, 2, 4, 0, 0, 9, 0, 0, 0, 5, 8, 5, 0, 0, 0, 0, 0, 4, 0, 8, 0, 0, 3, 2, 15, 0, 0, 0, 7, 0], 30) + 5,
+                        max: yMax,
                         ticks: {
                             font: { size: 11 },
                             stepSize: 5
@@ -182,3 +279,4 @@
     </script>
 </body>
 </html>
+```
