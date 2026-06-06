@@ -7,12 +7,14 @@ Rebuild Todoist project from local CSVs (safe, robust, /api/v1 endpoints).
 - Handles 410 API_DEPRECATED and surfaces error_extra.
 - Adds small retry/backoff for create/delete operations.
 - Generates 30-day performance chart showing daily unique food counts.
+- Commits chart to git so the raw link works.
 """
 import os
 import time
 import json
 import requests
 import pandas as pd
+import subprocess
 from datetime import datetime, timedelta
 
 # --- Config ---
@@ -270,6 +272,20 @@ def generate_performance_chart(food_record_df):
         f.write(html_content)
     
     print(f"✅ Chart generated: {CHART_PATH}")
+    
+    # Commit chart to git so the raw link works
+    try:
+        subprocess.run(["git", "add", CHART_PATH], cwd=BASE_DIR, check=True, capture_output=True)
+        subprocess.run(
+            ["git", "commit", "-m", f"Update performance chart - {datetime.now().strftime('%Y-%m-%d %H:%M')}"],
+            cwd=BASE_DIR,
+            check=True,
+            capture_output=True
+        )
+        print("✅ Chart committed to git")
+    except subprocess.CalledProcessError as e:
+        print(f"⚠️  Warning: Could not commit chart to git: {e}")
+        # Don't fail the whole script if git commit fails
 
 
 # --- 1. LOAD DATA (scheduled before midnight) ---
