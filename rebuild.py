@@ -7,7 +7,7 @@ Rebuild Todoist project from local CSVs (safe, robust, /api/v1 endpoints).
 - Handles 410 API_DEPRECATED and surfaces error_extra.
 - Adds small retry/backoff for create/delete operations.
 - Generates 30-day performance chart showing daily unique food counts.
-- Commits chart to git so the jsDelivr CDN link works.
+- Commits chart to git on docs/ folder for GitHub Pages.
 """
 import os
 import time
@@ -29,7 +29,11 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 CSV_FOOD_RECORD = os.path.join(BASE_DIR, "food_record.csv")
 CSV_FOOD_REFERENCE = os.path.join(BASE_DIR, "food_reference.csv")
-CHART_PATH = os.path.join(BASE_DIR, "performance_chart.html")
+DOCS_DIR = os.path.join(BASE_DIR, "docs")
+CHART_PATH = os.path.join(DOCS_DIR, "index.html")
+
+# Ensure docs directory exists
+os.makedirs(DOCS_DIR, exist_ok=True)
 
 HEADERS = {
     "Authorization": f"Bearer {TODOIST_TOKEN}",
@@ -273,7 +277,7 @@ def generate_performance_chart(food_record_df):
     
     print(f"✅ Chart generated: {CHART_PATH}")
     
-    # Commit chart to git so the jsDelivr CDN link works
+    # Commit chart to git so GitHub Pages can serve it
     try:
         subprocess.run(["git", "add", CHART_PATH], cwd=BASE_DIR, check=True, capture_output=True)
         subprocess.run(
@@ -465,14 +469,14 @@ if remaining_goal <= 0:
     parent_content = (
         f"Eat some plant foods. You've already had {recent_unique_count} "
         f"in the last 7 days! ({datetime.now().strftime('%d %b')})\n\n"
-        f"📊 [View 30-day performance](https://cdn.jsdelivr.net/gh/JevonDaffyd/python-food-tracker/performance_chart.html)"
+        f"📊 [View 30-day performance](https://JevonDaffyd.github.io/python-food-tracker/)"
     )
 else:
     # Still below target
     parent_content = (
         f"Eat {remaining_goal} plant foods today "
         f"({datetime.now().strftime('%d %b')})\n\n"
-        f"📊 [View 30-day performance](https://cdn.jsdelivr.net/gh/JevonDaffyd/python-food-tracker/performance_chart.html)"
+        f"📊 [View 30-day performance](https://JevonDaffyd.github.io/python-food-tracker/)"
     )
 
 parent_payload = {
