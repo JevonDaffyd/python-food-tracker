@@ -7,7 +7,7 @@ Rebuild Todoist project from local CSVs (safe, robust, /api/v1 endpoints).
 - Handles 410 API_DEPRECATED and surfaces error_extra.
 - Adds small retry/backoff for create/delete operations.
 - Generates 30-day performance chart showing daily unique food counts.
-- Commits chart to git so the raw link works.
+- Commits chart to git so the jsDelivr CDN link works.
 """
 import os
 import time
@@ -273,7 +273,7 @@ def generate_performance_chart(food_record_df):
     
     print(f"✅ Chart generated: {CHART_PATH}")
     
-    # Commit chart to git so the raw link works
+    # Commit chart to git so the jsDelivr CDN link works
     try:
         subprocess.run(["git", "add", CHART_PATH], cwd=BASE_DIR, check=True, capture_output=True)
         subprocess.run(
@@ -465,14 +465,14 @@ if remaining_goal <= 0:
     parent_content = (
         f"Eat some plant foods. You've already had {recent_unique_count} "
         f"in the last 7 days! ({datetime.now().strftime('%d %b')})\n\n"
-        f"📊 [View 30-day performance](https://github.com/JevonDaffyd/python-food-tracker/raw/main/performance_chart.html)"
+        f"📊 [View 30-day performance](https://cdn.jsdelivr.net/gh/JevonDaffyd/python-food-tracker/performance_chart.html)"
     )
 else:
     # Still below target
     parent_content = (
         f"Eat {remaining_goal} plant foods today "
         f"({datetime.now().strftime('%d %b')})\n\n"
-        f"📊 [View 30-day performance](https://github.com/JevonDaffyd/python-food-tracker/raw/main/performance_chart.html)"
+        f"📊 [View 30-day performance](https://cdn.jsdelivr.net/gh/JevonDaffyd/python-food-tracker/performance_chart.html)"
     )
 
 parent_payload = {
