@@ -59,34 +59,46 @@ def with_retries(func, max_attempts=4, base_delay=0.5, *args, **kwargs):
 
 
 def generate_performance_chart(food_record_df):
-    """Generate 30-day performance chart HTML with daily unique food counts."""
+    """Generate 30-day performance chart HTML with daily and rolling 7-day unique food counts."""
     print("Generating performance chart...")
     
-    # Convert Date to datetime and get last 30 days
+    # Setup timeline ranges
     today = pd.Timestamp.now().normalize()
-    thirty_days_ago = today - pd.Timedelta(days=29)  # 30 days inclusive
+    thirty_days_ago = today - pd.Timedelta(days=29)
+    start_for_rolling = thirty_days_ago - pd.Timedelta(days=6)  # lookback window for accurate week-1 rolling math
     
     food_record_df['Date'] = pd.to_datetime(food_record_df['Date'], errors='coerce')
-    recent_df = food_record_df[food_record_df['Date'] >= thirty_days_ago].copy()
     
-    # Calculate unique foods per day
-    daily_counts = recent_df.groupby('Date')['Food'].nunique().reset_index()
-    daily_counts.columns = ['Date', 'Count']
-    daily_counts = daily_counts.sort_values('Date')
+    # Create complete date range from lookback to today
+    full_range = pd.date_range(start=start_for_rolling, end=today, freq='D')
     
-    # Create complete date range (fill in missing dates with 0)
-    date_range = pd.date_range(start=thirty_days_ago, end=today, freq='D')
-    daily_counts_full = daily_counts.set_index('Date').reindex(date_range, fill_value=0).reset_index()
-    daily_counts_full.columns = ['Date', 'Count']
+    # Map food entries to sets per day to handle deduplication easily
+    foods_by_date = food_record_df.groupby('Date')['Food'].apply(set).reindex(full_range, fill_value=set())
     
-    # Format for chart
-    dates = [d.strftime('%Y-%m-%d') for d in daily_counts_full['Date']]
-    counts = daily_counts_full['Count'].tolist()
+    daily_counts = []
+    rolling_7_counts = []
     
-    start_date = dates[0]
-    end_date = dates[-1]
+    # Compute calculations across the complete timeline
+    for i in range(len(full_range)):
+        daily_counts.append(len(foods_by_date.iloc[i]))
+        
+        # Pull sliding 7-day window
+        start_idx = max(0, i - 6)
+        combined_window = set().union(*foods_by_date.iloc[start_idx:i+1])
+        rolling_7_counts.append(len(combined_window))
+        
+    # Slice down to just the final 30 days intended for presentation
+    chart_dates = [d.strftime('%Y-%m-%d') for d in full_range[-30:]]
+    chart_daily = daily_counts[-30:]
+    chart_rolling = rolling_7_counts[-30:]
     
-    # Generate HTML with Chart.js
+    # Text metrics for dashboard boxes
+    today_rolling_val = chart_rolling[-1]
+    avg_30_val = sum(chart_daily) / len(chart_daily) if chart_daily else 0
+    best_day_val = max(chart_daily) if chart_daily else 0
+    days_above_30_val = sum(1 for c in chart_daily if c >= 30)
+    
+    # Generate unified HTML layout
     html_content = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -95,120 +107,81 @@ def generate_performance_chart(food_record_df):
     <title>Food Tracker - 30 Day Performance</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body {{
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;
-            background: #f5f5f5;
-            padding: 16px;
-            margin: 0;
-        }}
-        .container {{
-            max-width: 100%;
-            background: white;
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }}
-        h1 {{
-            margin: 0 0 8px 0;
-            font-size: 24px;
-            color: #333;
-        }}
-        .subtitle {{
-            color: #666;
-            font-size: 14px;
-            margin-bottom: 20px;
-        }}
-        #chartContainer {{
-            position: relative;
-            height: 400px;
-            margin-bottom: 20px;
-        }}
-        .stats {{
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-top: 20px;
-        }}
-        .stat-box {{
-            background: #f9f9f9;
-            padding: 12px;
-            border-radius: 6px;
-            border-left: 4px solid #4CAF50;
-        }}
-        .stat-label {{
-            font-size: 12px;
-            color: #666;
-            text-transform: uppercase;
-            font-weight: 600;
-        }}
-        .stat-value {{
-            font-size: 24px;
-            font-weight: bold;
-            color: #333;
-            margin-top: 4px;
-        }}
+        body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; padding: 16px; margin: 0; }}
+        .container {{ max-width: 100%; background: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }}
+        h1 {{ margin: 0 0 8px 0; font-size: 24px; color: #333; }}
+        .subtitle {{ color: #666; font-size: 14px; margin-bottom: 20px; }}
+        #chartContainer {{ position: relative; height: 400px; margin-bottom: 20px; }}
+        .stats {{ display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }}
+        .stat-box {{ background: #f9f9f9; padding: 12px; border-radius: 6px; border-left: 4px solid #4CAF50; }}
+        .stat-label {{ font-size: 12px; color: #666; text-transform: uppercase; font-weight: 600; }}
+        .stat-value {{ font-size: 24px; font-weight: bold; color: #333; margin-top: 4px; }}
     </style>
 </head>
 <body>
     <div class="container">
         <h1>🥗 Food Tracker Performance</h1>
-        <p class="subtitle">30-day daily unique food count ({start_date} to {end_date})</p>
+        <p class="subtitle">30-day view with rolling 7-day unique counts ({chart_dates[0]} to {chart_dates[-1]})</p>
         
         <div id="chartContainer">
             <canvas id="performanceChart"></canvas>
         </div>
         
         <div class="stats">
-            <div class="stat-box">
-                <div class="stat-label">Today's Count</div>
-                <div class="stat-value">{counts[-1]} foods</div>
+            <div class="stat-box" style="border-left-color: #2196F3;">
+                <div class="stat-label">Today's 7-Day Unique Count</div>
+                <div class="stat-value">{today_rolling_val} foods</div>
             </div>
             <div class="stat-box">
-                <div class="stat-label">30-Day Average</div>
-                <div class="stat-value">{sum(counts)/len(counts):.1f} foods</div>
+                <div class="stat-label">30-Day Average (daily)</div>
+                <div class="stat-value">{avg_30_val:.1f} foods</div>
             </div>
             <div class="stat-box">
-                <div class="stat-label">Best Day</div>
-                <div class="stat-value">{max(counts)} foods</div>
+                <div class="stat-label">Best Day (daily)</div>
+                <div class="stat-value">{best_day_val} foods</div>
             </div>
-            <div class="stat-box">
-                <div class="stat-label">Days Above 30</div>
-                <div class="stat-value">{sum(1 for c in counts if c >= 30)} days</div>
+            <div class="stat-box" style="border-left-color: #FF9800;">
+                <div class="stat-label">Days Above 30 (daily)</div>
+                <div class="stat-value">{days_above_30_val} days</div>
             </div>
         </div>
     </div>
     
     <script>
         const ctx = document.getElementById('performanceChart').getContext('2d');
-        const chart = new Chart(ctx, {{
+        new Chart(ctx, {{
             type: 'line',
             data: {{
-                labels: {json.dumps(dates)},
+                labels: {json.dumps(chart_dates)},
                 datasets: [
                     {{
                         label: 'Daily Unique Foods',
-                        data: {json.dumps(counts)},
+                        data: {json.dumps(chart_daily)},
                         borderColor: '#4CAF50',
                         backgroundColor: 'rgba(76, 175, 80, 0.08)',
                         borderWidth: 2.5,
                         fill: true,
                         tension: 0.4,
-                        pointRadius: 4,
-                        pointBackgroundColor: '#4CAF50',
-                        pointBorderColor: '#fff',
-                        pointBorderWidth: 2,
-                        pointHoverRadius: 6
+                        pointRadius: 4
+                    }},
+                    {{
+                        label: 'Rolling 7‑Day Unique Foods',
+                        data: {json.dumps(chart_rolling)},
+                        borderColor: '#2196F3',
+                        backgroundColor: 'rgba(33, 150, 243, 0.06)',
+                        borderWidth: 2,
+                        fill: false,
+                        tension: 0.4,
+                        pointRadius: 3
                     }},
                     {{
                         label: 'Target (30 foods)',
-                        data: Array({len(dates)}).fill(30),
+                        data: Array({len(chart_dates)}).fill(30),
                         borderColor: '#FF9800',
                         borderWidth: 2,
                         borderDash: [5, 5],
                         fill: false,
-                        pointRadius: 0,
-                        pointHoverRadius: 0,
-                        tension: 0
+                        pointRadius: 0
                     }}
                 ]
             }},
@@ -216,24 +189,14 @@ def generate_performance_chart(food_record_df):
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {{
-                    legend: {{
-                        display: true,
-                        position: 'top',
-                        labels: {{
-                            font: {{ size: 12 }},
-                            padding: 12
-                        }}
-                    }},
+                    legend: {{ position: 'top' }},
                     tooltip: {{
-                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                        padding: 10,
-                        titleFont: {{ size: 13, weight: 'bold' }},
-                        bodyFont: {{ size: 12 }},
                         callbacks: {{
-                            afterLabel: function(context) {{
-                                if (context.datasetIndex === 0) {{
-                                    const value = context.parsed.y;
-                                    return value >= 30 ? '✓ Goal met!' : (30 - value) + ' to goal';
+                            label: ctx => `${{ctx.dataset.label}}: ${{ctx.parsed.y}}`,
+                            afterBody: ctx => {{
+                                if (ctx[0].dataset.label === 'Rolling 7‑Day Unique Foods') {{
+                                    const val = ctx[0].parsed.y;
+                                    return val >= 30 ? '✓ Goal met (7-day)!' : `${{30 - val}} to 30 (7-day)`;
                                 }}
                                 return '';
                             }}
@@ -241,30 +204,8 @@ def generate_performance_chart(food_record_df):
                     }}
                 }},
                 scales: {{
-                    x: {{
-                        grid: {{ display: false }},
-                        ticks: {{
-                            font: {{ size: 11 }},
-                            maxTicksLimit: 2,
-                            callback: function(index, ticks) {{
-                                if (index === 0 || index === ticks.length - 1) {{
-                                    return this.getLabelForValue(index);
-                                }}
-                                return '';
-                            }}
-                        }}
-                    }},
-                    y: {{
-                        beginAtZero: true,
-                        max: Math.max(...{json.dumps(counts)}, 30) + 5,
-                        ticks: {{
-                            font: {{ size: 11 }},
-                            stepSize: 5
-                        }},
-                        grid: {{
-                            color: 'rgba(0, 0, 0, 0.05)'
-                        }}
-                    }}
+                    x: {{ ticks: {{ maxTicksLimit: 8 }} }},
+                    y: {{ beginAtZero: true, ticks: {{ stepSize: 5 }} }}
                 }}
             }}
         }});
@@ -275,21 +216,7 @@ def generate_performance_chart(food_record_df):
     with open(CHART_PATH, 'w', encoding='utf-8') as f:
         f.write(html_content)
     
-    print(f"✅ Chart generated: {CHART_PATH}")
-    
-    # Commit chart to git so GitHub Pages can serve it
-    try:
-        subprocess.run(["git", "add", CHART_PATH], cwd=BASE_DIR, check=True, capture_output=True)
-        subprocess.run(
-            ["git", "commit", "-m", f"Update performance chart - {datetime.now().strftime('%Y-%m-%d %H:%M')}"],
-            cwd=BASE_DIR,
-            check=True,
-            capture_output=True
-        )
-        print("✅ Chart committed to git")
-    except subprocess.CalledProcessError as e:
-        print(f"⚠️  Warning: Could not commit chart to git: {e}")
-        # Don't fail the whole script if git commit fails
+    print(f"✅ Chart generated successfully: {CHART_PATH}")
 
 
 # --- 1. LOAD DATA (scheduled before midnight) ---
