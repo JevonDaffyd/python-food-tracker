@@ -6,84 +6,41 @@
     <title>Food Tracker - 30 Day Performance</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;
-            background: #f5f5f5;
-            padding: 16px;
-            margin: 0;
-        }
-        .container {
-            max-width: 100%;
-            background: white;
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        h1 {
-            margin: 0 0 8px 0;
-            font-size: 24px;
-            color: #333;
-        }
-        .subtitle {
-            color: #666;
-            font-size: 14px;
-            margin-bottom: 20px;
-        }
-        #chartContainer {
-            position: relative;
-            height: 400px;
-            margin-bottom: 20px;
-        }
-        .stats {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-top: 20px;
-        }
-        .stat-box {
-            background: #f9f9f9;
-            padding: 12px;
-            border-radius: 6px;
-            border-left: 4px solid #4CAF50;
-        }
-        .stat-label {
-            font-size: 12px;
-            color: #666;
-            text-transform: uppercase;
-            font-weight: 600;
-        }
-        .stat-value {
-            font-size: 24px;
-            font-weight: bold;
-            color: #333;
-            margin-top: 4px;
-        }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; padding: 16px; margin: 0; }
+        .container { max-width: 100%; background: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        h1 { margin: 0 0 8px 0; font-size: 24px; color: #333; }
+        .subtitle { color: #666; font-size: 14px; margin-bottom: 20px; }
+        #chartContainer { position: relative; height: 400px; margin-bottom: 20px; }
+        .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
+        .stat-box { background: #f9f9f9; padding: 12px; border-radius: 6px; border-left: 4px solid #4CAF50; }
+        .stat-label { font-size: 12px; color: #666; text-transform: uppercase; font-weight: 600; }
+        .stat-value { font-size: 24px; font-weight: bold; color: #333; margin-top: 4px; }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>🥗 Food Tracker Performance</h1>
-        <p class="subtitle">30-day daily unique food count (2026-05-09 to 2026-06-07)</p>
+        <p class="subtitle">30-day view with rolling 7-day unique counts (2026-05-09 to 2026-06-07)</p>
         
         <div id="chartContainer">
             <canvas id="performanceChart"></canvas>
         </div>
         
         <div class="stats">
-            <div class="stat-box">
-                <div class="stat-label">Today's Count</div>
-                <div class="stat-value">0 foods</div>
+            <div class="stat-box" style="border-left-color: #2196F3;">
+                <div class="stat-label">Today's 7-Day Unique Count</div>
+                <div class="stat-value">25 foods</div>
             </div>
             <div class="stat-box">
-                <div class="stat-label">30-Day Average</div>
+                <div class="stat-label">30-Day Average (daily)</div>
                 <div class="stat-value">2.7 foods</div>
             </div>
             <div class="stat-box">
-                <div class="stat-label">Best Day</div>
+                <div class="stat-label">Best Day (daily)</div>
                 <div class="stat-value">15 foods</div>
             </div>
-            <div class="stat-box">
-                <div class="stat-label">Days Above 30</div>
+            <div class="stat-box" style="border-left-color: #FF9800;">
+                <div class="stat-label">Days Above 30 (daily)</div>
                 <div class="stat-value">0 days</div>
             </div>
         </div>
@@ -91,7 +48,7 @@
     
     <script>
         const ctx = document.getElementById('performanceChart').getContext('2d');
-        const chart = new Chart(ctx, {
+        new Chart(ctx, {
             type: 'line',
             data: {
                 labels: ["2026-05-09", "2026-05-10", "2026-05-11", "2026-05-12", "2026-05-13", "2026-05-14", "2026-05-15", "2026-05-16", "2026-05-17", "2026-05-18", "2026-05-19", "2026-05-20", "2026-05-21", "2026-05-22", "2026-05-23", "2026-05-24", "2026-05-25", "2026-05-26", "2026-05-27", "2026-05-28", "2026-05-29", "2026-05-30", "2026-05-31", "2026-06-01", "2026-06-02", "2026-06-03", "2026-06-04", "2026-06-05", "2026-06-06", "2026-06-07"],
@@ -104,11 +61,17 @@
                         borderWidth: 2.5,
                         fill: true,
                         tension: 0.4,
-                        pointRadius: 4,
-                        pointBackgroundColor: '#4CAF50',
-                        pointBorderColor: '#fff',
-                        pointBorderWidth: 2,
-                        pointHoverRadius: 6
+                        pointRadius: 4
+                    },
+                    {
+                        label: 'Rolling 7‑Day Unique Foods',
+                        data: [15, 15, 15, 10, 14, 14, 12, 11, 13, 18, 21, 16, 16, 16, 16, 12, 7, 4, 11, 11, 11, 12, 13, 22, 22, 17, 17, 21, 26, 25],
+                        borderColor: '#2196F3',
+                        backgroundColor: 'rgba(33, 150, 243, 0.06)',
+                        borderWidth: 2,
+                        fill: false,
+                        tension: 0.4,
+                        pointRadius: 3
                     },
                     {
                         label: 'Target (30 foods)',
@@ -117,9 +80,7 @@
                         borderWidth: 2,
                         borderDash: [5, 5],
                         fill: false,
-                        pointRadius: 0,
-                        pointHoverRadius: 0,
-                        tension: 0
+                        pointRadius: 0
                     }
                 ]
             },
@@ -127,24 +88,14 @@
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: {
-                        display: true,
-                        position: 'top',
-                        labels: {
-                            font: { size: 12 },
-                            padding: 12
-                        }
-                    },
+                    legend: { position: 'top' },
                     tooltip: {
-                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                        padding: 10,
-                        titleFont: { size: 13, weight: 'bold' },
-                        bodyFont: { size: 12 },
                         callbacks: {
-                            afterLabel: function(context) {
-                                if (context.datasetIndex === 0) {
-                                    const value = context.parsed.y;
-                                    return value >= 30 ? '✓ Goal met!' : (30 - value) + ' to goal';
+                            label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y}`,
+                            afterBody: ctx => {
+                                if (ctx[0].dataset.label === 'Rolling 7‑Day Unique Foods') {
+                                    const val = ctx[0].parsed.y;
+                                    return val >= 30 ? '✓ Goal met (7-day)!' : `${30 - val} to 30 (7-day)`;
                                 }
                                 return '';
                             }
@@ -152,30 +103,8 @@
                     }
                 },
                 scales: {
-                    x: {
-                        grid: { display: false },
-                        ticks: {
-                            font: { size: 11 },
-                            maxTicksLimit: 2,
-                            callback: function(index, ticks) {
-                                if (index === 0 || index === ticks.length - 1) {
-                                    return this.getLabelForValue(index);
-                                }
-                                return '';
-                            }
-                        }
-                    },
-                    y: {
-                        beginAtZero: true,
-                        max: Math.max(...[2, 4, 0, 0, 9, 0, 0, 0, 5, 8, 5, 0, 0, 0, 0, 0, 4, 0, 8, 0, 0, 3, 2, 15, 0, 0, 0, 7, 8, 0], 30) + 5,
-                        ticks: {
-                            font: { size: 11 },
-                            stepSize: 5
-                        },
-                        grid: {
-                            color: 'rgba(0, 0, 0, 0.05)'
-                        }
-                    }
+                    x: { ticks: { maxTicksLimit: 8 } },
+                    y: { beginAtZero: true, ticks: { stepSize: 5 } }
                 }
             }
         });
