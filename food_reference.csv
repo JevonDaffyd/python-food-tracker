@@ -1,11 +1,9 @@
 Food,Category,Last_Date_Eaten,Days_Since_Eaten,Total_Count,Todoist_Priority
-Brazil Nut,Other,2026-05-27,14,48,4
 Sunflower Seed,Other,2026-06-01,9,48,4
 Blackberries,Fruit,2026-05-13,28,44,4
 Broccoli,Vegetables,2026-06-01,9,43,4
 Coconut,Other,2026-06-01,9,39,4
 Cherries,Fruit,2026-06-01,9,34,4
-Grape,Fruit,2026-04-29,42,25,4
 Carrot,Vegetables,2026-06-01,9,24,4
 Flaxseed,Other,2026-05-02,39,21,4
 Mango,Fruit,2026-02-18,112,17,4
@@ -53,7 +51,6 @@ Quinoa,Other,,999,0,4
 Red cabbage,Vegetables,,999,0,4
 Rocket,Vegetables,,999,0,4
 Rosa verde,Vegetables,,999,0,4
-Potato,Vegetables,2026-06-05,5,67,3
 Sweet Potato,Vegetables,2026-06-05,5,40,3
 Kidney Bean,Other,2026-06-05,5,11,3
 Black Beans,Other,2026-06-05,5,5,3
@@ -61,7 +58,6 @@ Butter Beans,Other,2026-06-05,5,1,3
 Cannellini Beans,Other,2026-06-05,5,1,3
 Banana,Fruit,2026-06-06,4,58,2
 Avocado,Fruit,2026-06-06,4,51,2
-Tomato,Vegetables,2026-06-06,4,45,2
 Hazelnut,Other,2026-06-06,4,41,2
 Mushroom,Vegetables,2026-06-06,4,40,2
 Pistachio,Other,2026-06-07,3,39,2
@@ -71,17 +67,21 @@ Pecan,Other,2026-06-07,3,17,2
 Lentils,Other,2026-06-07,3,9,2
 Aubergine,Vegetables,2026-06-07,3,7,2
 Olive,Vegetables,2026-06-06,4,4,2
-Coffee,Other,2026-06-08,2,214,1
+Coffee,Other,2026-06-09,1,215,1
 Chocolate,Other,2026-06-08,2,173,1
 Oats,Other,2026-06-08,2,104,1
-Rice,Other,2026-06-08,2,96,1
+Rice,Other,2026-06-09,1,97,1
+Potato,Vegetables,2026-06-09,1,68,1
 Peanut,Other,2026-06-08,2,68,1
 Almond,Other,2026-06-08,2,64,1
 Blueberries,Fruit,2026-06-08,2,58,1
 Pumpkin Seed,Other,2026-06-08,2,56,1
 Raspberries,Fruit,2026-06-08,2,51,1
+Brazil Nut,Other,2026-06-09,1,49,1
 Strawberries,Fruit,2026-06-08,2,49,1
 Onion,Vegetables,2026-06-08,2,48,1
+Tomato,Vegetables,2026-06-09,1,46,1
 Cranberries,Fruit,2026-06-08,2,46,1
 Walnut,Other,2026-06-08,2,41,1
 Pepper,Vegetables,2026-06-08,2,39,1
+Grape,Fruit,2026-06-09,1,26,1
