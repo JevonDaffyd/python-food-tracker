@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Food Tracker - Rolling 7 Day Unique</title>
+  <title>Food Tracker - Rolling v Target</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body { font-family: -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Ubuntu,sans-serif; background:#f5f5f5; padding:16px; margin:0; }
@@ -19,7 +19,7 @@
 </head>
 <body>
   <div class="container">
-    <h1>🥗 Food Tracker Performance</h1>
+    <h1>Food: Rolling v Target</h1>
     <p class="subtitle">30‑day view with rolling 7‑day unique counts (from food_record.csv)</p>
 
     <div id="chartContainer"><canvas id="performanceChart"></canvas></div>
@@ -45,20 +45,9 @@
   </div>
 
   <script>
-  /************************************************************************
-   * This page fetches food_record.csv from the same folder as the HTML.
-   * It expects CSV rows: Date,Food,Category
-   * It computes daily unique counts and a rolling 7-day unique count.
-   *
-   * To use: place this HTML and food_record.csv in the same repo/folder
-   * (GitHub Pages will serve the CSV at the same relative path).
-   ************************************************************************/
-
-  // --- Set the CSV path relative to this HTML file (same folder) ---
   const csvUrl = 'food_record.csv';
-  const csvText = ''; // leave empty when using csvUrl
+  const csvText = '';
 
-  // ---------- Helpers ----------
   function parseCSV(text) {
     const lines = text.trim().split(/\r?\n/);
     if (lines.length < 2) return [];
@@ -101,7 +90,6 @@
     return rolling;
   }
 
-  // ---------- Main flow ----------
   (async function main() {
     let text = csvText;
     if (csvUrl) {
@@ -110,8 +98,6 @@
         if (!res.ok) throw new Error('Failed to fetch CSV: ' + res.status);
         text = await res.text();
       } catch (e) {
-        console.error('CSV fetch failed:', e);
-        // If fetch fails and csvText is empty, stop with an error message in the stats
         document.getElementById('todaysCount').textContent = 'CSV load error';
         return;
       }
@@ -119,27 +105,18 @@
 
     const entries = parseCSV(text);
 
-    // determine max date in entries (or today)
     let maxDate = null;
-    entries.forEach(e => {
-      if (!maxDate || e.date > maxDate) maxDate = e.date;
-    });
-    if (!maxDate) {
-      const t = new Date();
-      maxDate = t.toISOString().slice(0,10);
-    }
+    entries.forEach(e => { if (!maxDate || e.date > maxDate) maxDate = e.date; });
+    if (!maxDate) maxDate = new Date().toISOString().slice(0,10);
 
-    // 30-day window ending at maxDate
     const end = new Date(maxDate + 'T00:00:00');
     const start = new Date(end);
     start.setDate(start.getDate() - 29);
     const labels = buildDateRange(start.toISOString().slice(0,10), maxDate);
 
-    // aggregate foods by date (use Set to dedupe same-day duplicates)
     const foodsByDate = new Map();
     labels.forEach(d => foodsByDate.set(d, new Set()));
     entries.forEach(({date, food}) => {
-      if (!date || !food) return;
       if (!foodsByDate.has(date)) foodsByDate.set(date, new Set());
       foodsByDate.get(date).add(food);
     });
@@ -148,11 +125,10 @@
     const dailyUniqueCounts = dailyFoodsArr.map(arr => new Set(arr).size);
     const rolling7Unique = computeRollingUnique(dailyFoodsArr, 7);
 
-    // stats
     const lastIndex = rolling7Unique.length - 1;
     const todayRolling = lastIndex >= 0 ? rolling7Unique[lastIndex] : 0;
-    const avg30 = dailyUniqueCounts.length ? (dailyUniqueCounts.reduce((a,b)=>a+b,0) / dailyUniqueCounts.length) : 0;
-    const bestDay = dailyUniqueCounts.length ? Math.max(...dailyUniqueCounts) : 0;
+    const avg30 = dailyUniqueCounts.reduce((a,b)=>a+b,0) / dailyUniqueCounts.length;
+    const bestDay = Math.max(...dailyUniqueCounts);
     const daysAbove30 = dailyUniqueCounts.filter(v => v >= 30).length;
 
     document.getElementById('todaysCount').textContent = `${todayRolling} foods`;
@@ -160,7 +136,6 @@
     document.getElementById('bestDay').textContent = `${bestDay} foods`;
     document.getElementById('daysAbove30').textContent = `${daysAbove30} days`;
 
-    // chart
     const ctx = document.getElementById('performanceChart').getContext('2d');
     const maxDataValue = Math.max(...dailyUniqueCounts, ...rolling7Unique, 30);
     const yMax = Math.ceil((maxDataValue + 5) / 5) * 5;
@@ -168,27 +143,27 @@
     new Chart(ctx, {
       type: 'line',
       data: {
-        labels: labels,
+        labels: labels.map(d => {
+          const dt = new Date(d);
+          return dt.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+        }),
         datasets: [
           {
+            type: 'bar',
             label: 'Daily Unique Foods',
             data: dailyUniqueCounts,
-            borderColor: '#4CAF50',
-            backgroundColor: 'rgba(76,175,80,0.08)',
-            borderWidth: 2.5,
-            fill: true,
-            tension: 0.4,
-            pointRadius: 4
+            backgroundColor: '#999',
+            borderWidth: 0
           },
           {
             label: 'Rolling 7‑Day Unique Foods',
             data: rolling7Unique,
             borderColor: '#2196F3',
-            backgroundColor: 'rgba(33,150,243,0.06)',
             borderWidth: 2,
             fill: false,
             tension: 0.4,
-            pointRadius: 3
+            pointRadius: 0,
+            pointHoverRadius: 0
           },
           {
             label: 'Target (30 foods)',
@@ -204,24 +179,22 @@
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        plugins: {
-          legend: { position: 'top' },
-          tooltip: {
-            callbacks: {
-              label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y}`,
-              afterBody: ctx => {
-                if (ctx[0].dataset.label === 'Rolling 7‑Day Unique Foods') {
-                  const val = ctx[0].parsed.y;
-                  return val >= 30 ? '✓ Goal met (7-day)!' : `${30 - val} to 30 (7-day)`;
+        scales: {
+          x: {
+            ticks: {
+              callback: function(value, index, ticks) {
+                if (index === 0 || index === ticks.length - 1) {
+                  return this.getLabelForValue(value);
                 }
                 return '';
               }
             }
+          },
+          y: {
+            beginAtZero: true,
+            max: yMax,
+            ticks: { stepSize: 5 }
           }
-        },
-        scales: {
-          x: { ticks: { maxTicksLimit: 8 } },
-          y: { beginAtZero: true, max: yMax, ticks: { stepSize: 5 } }
         }
       }
     });
@@ -229,4 +202,3 @@
   </script>
 </body>
 </html>
-
