@@ -2,7 +2,7 @@
 import os
 import requests
 import pandas as pd
-from datetime import datetime, timezone, time
+from datetime import datetime, timezone, timedelta
 
 TODOIST_TOKEN = os.environ.get("TODOIST_TOKEN")
 PROJECT_ID = "6fxHrQ58f8jFXp24"
@@ -13,10 +13,10 @@ if not TODOIST_TOKEN:
     print("❌ TODOIST_TOKEN missing")
     raise SystemExit(1)
 
-# Build UTC since/until for "today" (adjust to local timezone if desired)
-today_utc = datetime.now(timezone.utc).date()
-since = datetime.combine(today_utc, time.min, tzinfo=timezone.utc).isoformat()
-until = datetime.combine(today_utc, time.max, tzinfo=timezone.utc).isoformat()
+# Look back exactly 36 hours from right now to absorb GitHub runner delays
+now = datetime.now(timezone.utc)
+since = (now - timedelta(hours=36)).isoformat()
+until = now.isoformat()
 
 URL = "https://api.todoist.com/api/v1/tasks/completed/by_completion_date"
 headers = {"Authorization": f"Bearer {TODOIST_TOKEN}"}
@@ -24,7 +24,7 @@ params = {"since": since, "until": until, "limit": 200, "offset": 0}
 
 completed_items = []
 
-print(f"Fetching completed tasks from {URL} for {today_utc.isoformat()} (UTC)...")
+print(f"Fetching completed tasks from {URL} for the last 36 hours (UTC)...")
 
 while True:
     r = requests.get(URL, headers=headers, params=params, timeout=30)
@@ -60,7 +60,6 @@ try:
 except FileNotFoundError:
     food_record = pd.DataFrame(columns=["Date", "Food"])
 
-today_str = today_utc.isoformat()
 new_entries = []
 
 for it in completed_items:
@@ -72,11 +71,16 @@ for it in completed_items:
     if not content:
         continue
 
-    # Option A: dedupe by text+date (keeps your original behavior)
-    is_dup = ((food_record["Date"] == today_str) & (food_record["Food"] == content)).any()
+    # Extract the actual historical calendar day the task was checked off (YYYY-MM-DD)
+    task_completed_date = it.get("completed_at", "")[:10]
+    if not task_completed_date:
+        continue
+
+    # Deduplicate checking against the actual day completed, not the script run time
+    is_dup = ((food_record["Date"] == task_completed_date) & (food_record["Food"] == content)).any()
     if not is_dup:
-        new_entries.append({"Date": today_str, "Food": content})
-        print(f"  ✓ Queued: {content}")
+        new_entries.append({"Date": task_completed_date, "Food": content})
+        print(f"  ✓ Queued: {content} for {task_completed_date}")
 
 # Save
 if new_entries:
