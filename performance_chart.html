@@ -4,14 +4,13 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Food Tracker - Rolling v Target</title>
-  <!-- Use vendored Chart.js (place vendor/chart.umd.27100be.min.js in repo) -->
-  <script src="vendor/chart.umd.27100be.min.js"></script>
   <style>
     body { font-family: -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Ubuntu,sans-serif; background:#f5f5f5; padding:16px; margin:0; }
     .container { max-width:100%; background:#fff; border-radius:8px; padding:20px; box-shadow:0 2px 8px rgba(0,0,0,0.08); }
     h1 { margin:0 0 8px 0; font-size:24px; color:#333; }
     .subtitle { color:#666; font-size:14px; margin-bottom:20px; }
-    #chartContainer { position:relative; height:400px; margin-bottom:20px; }
+    #chartContainer { position:relative; height:420px; margin-bottom:20px; }
+    canvas { width:100%; height:100%; }
     .stats { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:20px; }
     .stat-box { background:#f9f9f9; padding:12px; border-radius:6px; border-left:4px solid #4CAF50; }
     .stat-label { font-size:12px; color:#666; text-transform:uppercase; font-weight:600; }
@@ -46,28 +45,13 @@
   </div>
 
   <script>
-  // Version stamp so you can tell which HTML/JS loaded
-  const CHART_VERSION = 'perf-chart v2 2026-07-04 (vendored)';
+  // Single-file portable chart (no Chart.js). Draws a simple bar + line chart on canvas.
+  const CHART_VERSION = 'perf-chart v3 embedded (no external libs) 2026-07-04';
   console.log('Loaded', CHART_VERSION);
   document.title += ' — ' + CHART_VERSION;
 
-  // Cache-bust CSV fetch with a stable token (update token on deploy if needed)
-  const csvUrlBase = 'food_record.csv';
-  const CACHE_BUST = '?v=27100be';
-  const csvUrl = csvUrlBase + CACHE_BUST;
-
-  // Fallback: if Chart is not present (e.g., vendor file missing), attempt to load CDN as last resort
-  function loadFallbackChartFromCDN() {
-    console.warn('Chart.js not found locally; attempting to load from CDN as fallback.');
-    const s = document.createElement('script');
-    s.src = 'https://cdn.jsdelivr.net/npm/chart.js?v=27100be';
-    s.crossOrigin = 'anonymous';
-    s.onload = () => { console.log('Loaded Chart.js from CDN fallback'); main(); };
-    s.onerror = () => { console.error('Failed to load Chart.js from CDN fallback — chart will not render.'); };
-    document.head.appendChild(s);
-  }
-
-  const csvText = '';
+  // Absolute raw CSV URL so the page works when opened from any device via raw.githubusercontent.
+  const csvUrl = 'https://raw.githubusercontent.com/JevonDaffyd/python-food-tracker/main/food_record.csv?v=27100be';
 
   function parseCSV(text) {
     const lines = text.trim().split(/\r?\n/);
@@ -111,32 +95,106 @@
     return rolling;
   }
 
-  async function main() {
-    // If Chart is missing (vendored file not present), try CDN fallback
-    if (typeof Chart === 'undefined') {
-      loadFallbackChartFromCDN();
-      return; // will call main() again after CDN loads
+  // Simple canvas chart renderer (bar + line + dashed target)
+  function drawChartCanvas(canvas, labels, dailyCounts, rollingCounts) {
+    const DPR = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width * DPR;
+    canvas.height = rect.height * DPR;
+    const ctx = canvas.getContext('2d');
+    ctx.scale(DPR, DPR);
+    ctx.clearRect(0,0,rect.width,rect.height);
+
+    // layout
+    const padding = {top:20, right:16, bottom:30, left:36};
+    const w = rect.width - padding.left - padding.right;
+    const h = rect.height - padding.top - padding.bottom;
+
+    // compute y scale
+    const maxDataValue = Math.max(...dailyCounts, ...rollingCounts, 30);
+    const yMax = Math.ceil((maxDataValue + 5) / 5) * 5;
+    const step = 5;
+
+    // draw y grid and labels
+    ctx.fillStyle = '#666';
+    ctx.font = '12px system-ui, -apple-system, Roboto, Arial';
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+    for (let val = 0; val <= yMax; val += step) {
+      const y = padding.top + h - (val / yMax) * h;
+      ctx.fillStyle = '#eee';
+      ctx.fillRect(padding.left, y - 0.5, w, 1);
+      ctx.fillStyle = '#666';
+      ctx.fillText(String(val), padding.left - 8, y);
     }
 
-    let text = csvText;
-    if (csvUrl) {
-      try {
-        const res = await fetch(csvUrl, { cache: 'no-store' });
-        if (!res.ok) throw new Error('Failed to fetch CSV: ' + res.status);
-        text = await res.text();
-      } catch (e) {
-        document.getElementById('todaysCount').textContent = 'CSV load error';
-        console.error(e);
-        return;
-      }
+    // draw bars
+    const barGap = 6;
+    const n = labels.length;
+    const barW = Math.max(6, (w - (n - 1) * barGap) / n);
+    for (let i = 0; i < n; i++) {
+      const x = padding.left + i * (barW + barGap);
+      const val = dailyCounts[i] || 0;
+      const barH = (val / yMax) * h;
+      const y = padding.top + h - barH;
+      ctx.fillStyle = '#999';
+      ctx.fillRect(x, y, barW, barH);
     }
 
-    // Debug logs showing CSV and computed date
-    console.log('CSV fetched — length:', text.length);
-    console.log('First line of CSV:', (text.split(/\r?\n/)[0] || '').slice(0,200));
+    // draw rolling line
+    ctx.beginPath();
+    for (let i = 0; i < n; i++) {
+      const cx = padding.left + i * (barW + barGap) + barW / 2;
+      const cy = padding.top + h - ((rollingCounts[i] || 0) / yMax) * h;
+      if (i === 0) ctx.moveTo(cx, cy); else ctx.lineTo(cx, cy);
+    }
+    ctx.strokeStyle = '#2196F3';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // draw target dashed line at 30
+    const target = 30;
+    const yTarget = padding.top + h - (target / yMax) * h;
+    ctx.setLineDash([6,4]);
+    ctx.beginPath();
+    ctx.moveTo(padding.left, yTarget);
+    ctx.lineTo(padding.left + w, yTarget);
+    ctx.strokeStyle = '#FF9800';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // draw x labels (only first and last)
+    ctx.fillStyle = '#333';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    const firstLabel = labels[0] || '';
+    const lastLabel = labels[labels.length-1] || '';
+    const firstX = padding.left + barW/2;
+    const lastX = padding.left + (n-1) * (barW + barGap) + barW/2;
+    ctx.fillText(formatShortDate(firstLabel), firstX, padding.top + h + 6);
+    ctx.fillText(formatShortDate(lastLabel), lastX, padding.top + h + 6);
+  }
+
+  function formatShortDate(iso) {
+    if (!iso) return '';
+    const dt = new Date(iso + 'T00:00:00');
+    return dt.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+  }
+
+  (async function main() {
+    let text = '';
+    try {
+      const res = await fetch(csvUrl, { cache: 'no-store' });
+      if (!res.ok) throw new Error('Failed to fetch CSV: ' + res.status);
+      text = await res.text();
+    } catch (e) {
+      console.error('CSV load error', e);
+      document.getElementById('todaysCount').textContent = 'CSV load error';
+      return;
+    }
 
     const entries = parseCSV(text);
-
     let maxDate = null;
     entries.forEach(e => { if (!maxDate || e.date > maxDate) maxDate = e.date; });
     if (!maxDate) maxDate = new Date().toISOString().slice(0,10);
@@ -168,73 +226,20 @@
     document.getElementById('bestDay').textContent = `${bestDay} foods`;
     document.getElementById('daysAbove30').textContent = `${daysAbove30} days`;
 
-    const ctx = document.getElementById('performanceChart').getContext('2d');
-    const maxDataValue = Math.max(...dailyUniqueCounts, ...rolling7Unique, 30);
-    const yMax = Math.ceil((maxDataValue + 5) / 5) * 5;
+    const canvas = document.getElementById('performanceChart');
+    function resizeAndDraw() {
+      drawChartCanvas(canvas, labels, dailyUniqueCounts, rolling7Unique);
+    }
+    // initial draw
+    resizeAndDraw();
+    // redraw on resize
+    let resizeTimer = null;
+    window.addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(resizeAndDraw, 150); });
 
-    new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: labels.map(d => {
-          const dt = new Date(d);
-          return dt.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
-        }),
-        datasets: [
-          {
-            type: 'bar',
-            label: 'Daily Unique Foods',
-            data: dailyUniqueCounts,
-            backgroundColor: '#999',
-            borderWidth: 0
-          },
-          {
-            label: 'Rolling 7‑Day Unique Foods',
-            data: rolling7Unique,
-            borderColor: '#2196F3',
-            borderWidth: 2,
-            fill: false,
-            tension: 0.4,
-            pointRadius: 0,
-            pointHoverRadius: 0
-          },
-          {
-            label: 'Target (30 foods)',
-            data: Array(labels.length).fill(30),
-            borderColor: '#FF9800',
-            borderWidth: 2,
-            borderDash: [5,5],
-            fill: false,
-            pointRadius: 0
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          x: {
-            ticks: {
-              callback: function(value, index, ticks) {
-                if (index === 0 || index === ticks.length - 1) {
-                  return this.getLabelForValue(value);
-                }
-                return '';
-              }
-            }
-          },
-          y: {
-            beginAtZero: true,
-            max: yMax,
-            ticks: { stepSize: 5 }
-          }
-        }
-      }
-    });
-  }
-
-  // Start main if Chart is already available
-  if (typeof Chart !== 'undefined') main();
-  // Otherwise, main() will be called after fallback CDN load completes
+    // debug logs
+    console.log('CSV length:', text.length);
+    console.log('Computed maxDate:', maxDate);
+  })();
 
   </script>
 </body>
