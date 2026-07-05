@@ -158,14 +158,10 @@ def generate_performance_chart(food_record_df):
                 labels: {json.dumps(chart_dates)},
                 datasets: [
                     {{
+                        type: 'bar',
                         label: 'Daily Unique Foods',
                         data: {json.dumps(chart_daily)},
-                        borderColor: '#4CAF50',
-                        backgroundColor: 'rgba(76, 175, 80, 0.08)',
-                        borderWidth: 2.5,
-                        fill: true,
-                        tension: 0.4,
-                        pointRadius: 4
+                        backgroundColor:'rgba(0, 0, 0, 0.15)'
                     }},
                     {{
                         label: 'Rolling 7‑Day Unique Foods',
