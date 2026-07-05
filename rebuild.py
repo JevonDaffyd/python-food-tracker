@@ -116,6 +116,9 @@ def generate_performance_chart(food_record_df):
         .stat-box {{ background: #f9f9f9; padding: 12px; border-radius: 6px; border-left: 4px solid #4CAF50; }}
         .stat-label {{ font-size: 12px; color: #666; text-transform: uppercase; font-weight: 600; }}
         .stat-value {{ font-size: 24px; font-weight: bold; color: #333; margin-top: 4px; }}
+        @media (max-width: 600px) {{
+            .stats {{ grid-template-columns: 1fr; }}
+        }}
     </style>
 </head>
 <body>
@@ -219,6 +222,31 @@ def generate_performance_chart(food_record_df):
     print(f"✅ Chart generated successfully: {CHART_PATH}")
 
 
+def push_chart_to_github():
+    """Commits and pushes the generated chart to GitHub via subprocess."""
+    print("Committing and pushing chart to GitHub...")
+    try:
+        # Configure Git for GitHub Actions
+        subprocess.run(["git", "config", "user.name", "github-actions[bot]"], check=True, cwd=BASE_DIR)
+        subprocess.run(["git", "config", "user.email", "github-actions[bot]@users.noreply.github.com"], check=True, cwd=BASE_DIR)
+        
+        # Add the chart file to staging
+        subprocess.run(["git", "add", CHART_PATH], check=True, cwd=BASE_DIR)
+        
+        # Check if there are actually changes to commit
+        status = subprocess.run(["git", "status", "--porcelain", CHART_PATH], capture_output=True, text=True, cwd=BASE_DIR)
+        
+        if status.stdout.strip():
+            subprocess.run(["git", "commit", "-m", "Auto-update performance chart"], check=True, cwd=BASE_DIR)
+            subprocess.run(["git", "push"], check=True, cwd=BASE_DIR)
+            print("✅ Chart successfully pushed to GitHub.")
+        else:
+            print("➖ No changes to chart layout or data; nothing to push.")
+            
+    except subprocess.CalledProcessError as e:
+        print(f"❌ Git operation failed. Make sure your GitHub Actions workflow has write permissions. Error: {e}")
+
+
 # --- 1. LOAD DATA (scheduled before midnight) ---
 print("Loading CSV data...")
 try:
@@ -293,6 +321,7 @@ print("Local CSVs updated.")
 
 # --- 3b. GENERATE PERFORMANCE CHART ---
 generate_performance_chart(food_record)
+push_chart_to_github()
 
 # --- 4. REBUILD TODOIST PROJECT (use /api/v1 endpoints) ---
 print("Cleaning and rebuilding Todoist project...")
