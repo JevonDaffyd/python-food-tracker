@@ -396,14 +396,14 @@ if remaining_goal <= 0:
     parent_content = (
         f"Eat some plant foods. You've already had {recent_unique_count} "
         f"in the last 7 days! ({datetime.now().strftime('%d %b')})\n\n"
-        f"📊 [View 30-day performance](https://JevonDaffyd.github.io/python-food-tracker/)"
+        f"📊 [View 30-day performance](https://jevondaffyd.github.io/python-food-tracker/)"
     )
 else:
     # Still below target
     parent_content = (
         f"Eat {remaining_goal} plant foods today "
         f"({datetime.now().strftime('%d %b')})\n\n"
-        f"📊 [View 30-day performance](https://JevonDaffyd.github.io/python-food-tracker/)"
+        f"📊 [View 30-day performance](https://jevondaffyd.github.io/python-food-tracker/)"
     )
 
 parent_payload = {
