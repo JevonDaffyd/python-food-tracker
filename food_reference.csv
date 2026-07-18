@@ -1,14 +1,9 @@
 Food,Category,Last_Date_Eaten,Days_Since_Eaten,Total_Count,Todoist_Priority
 Oats,Other,2026-07-11,7,108,4
-Rice,Other,2026-07-10,8,103,4
-Peanut,Other,2026-06-15,33,69,4
 Banana,Fruit,2026-07-10,8,63,4
 Raspberries,Fruit,2026-07-04,14,54,4
 Tomato,Vegetables,2026-07-11,7,50,4
-Onion,Vegetables,2026-06-15,33,49,4
-Broccoli,Vegetables,2026-06-01,47,43,4
 Walnut,Other,2026-06-16,32,42,4
-Pepper,Vegetables,2026-07-10,8,42,4
 Sweet Potato,Vegetables,2026-06-05,43,40,4
 Apple,Fruit,2026-07-01,17,38,4
 Cherries,Fruit,2026-06-23,25,37,4
@@ -73,7 +68,6 @@ Potato,Vegetables,2026-07-13,5,75,3
 Almond,Other,2026-07-12,6,67,3
 Avocado,Fruit,2026-07-13,5,54,3
 Brazil Nut,Other,2026-07-12,6,52,3
-Mushroom,Vegetables,2026-07-13,5,42,3
 Chocolate,Other,2026-07-15,3,184,2
 Blueberries,Fruit,2026-07-14,4,62,2
 Pumpkin Seed,Other,2026-07-15,3,60,2
@@ -87,4 +81,10 @@ Pistachio,Other,2026-07-14,4,41,2
 Flaxseed,Other,2026-07-15,3,22,2
 Pecan,Other,2026-07-15,3,20,2
 Coffee,Other,2026-07-16,2,229,1
+Rice,Other,2026-07-17,1,104,1
+Peanut,Other,2026-07-17,1,70,1
+Onion,Vegetables,2026-07-17,1,51,1
+Broccoli,Vegetables,2026-07-17,1,44,1
+Pepper,Vegetables,2026-07-16,2,43,1
+Mushroom,Vegetables,2026-07-17,1,43,1
 Turmeric,Other,2026-07-16,2,4,1
