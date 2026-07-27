@@ -1,7 +1,6 @@
 Food,Category,Last_Date_Eaten,Days_Since_Eaten,Total_Count,Todoist_Priority
 Coffee,Other,2026-07-20,7,231,4
 Chocolate,Other,2026-07-15,12,184,4
-Potato,Vegetables,2026-07-20,7,77,4
 Peanut,Other,2026-07-17,10,70,4
 Banana,Fruit,2026-07-10,17,63,4
 Blueberries,Fruit,2026-07-20,7,63,4
@@ -85,6 +84,7 @@ Coconut,Other,2026-07-21,6,43,3
 Cherries,Fruit,2026-07-21,6,38,3
 Pinto Beans,Other,2026-07-22,5,10,3
 Rice,Other,2026-07-23,4,107,2
+Potato,Vegetables,2026-07-24,3,78,2
 Almond,Other,2026-07-24,3,68,2
 Brazil Nut,Other,2026-07-24,3,53,2
 Cranberries,Fruit,2026-07-24,3,50,2
