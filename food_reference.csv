@@ -1,6 +1,5 @@
 Food,Category,Last_Date_Eaten,Days_Since_Eaten,Total_Count,Todoist_Priority
 Oats,Other,2026-07-21,13,109,4
-Potato,Vegetables,2026-07-24,10,78,4
 Peanut,Other,2026-07-17,17,70,4
 Blueberries,Fruit,2026-07-27,7,64,4
 Pumpkin Seed,Other,2026-07-27,7,61,4
@@ -18,7 +17,6 @@ Sweet Potato,Vegetables,2026-06-05,59,40,4
 Apple,Fruit,2026-07-01,33,38,4
 Haricot Bean,Other,2026-07-11,23,31,4
 Grape,Fruit,2026-06-18,46,27,4
-Carrot,Vegetables,2026-06-01,63,24,4
 Flaxseed,Other,2026-07-15,19,22,4
 Pecan,Other,2026-07-15,19,20,4
 Mango,Fruit,2026-07-27,7,19,4
@@ -45,7 +43,6 @@ Prunes,Fruit,2025-08-14,354,4,4
 Spinach,Vegetables,2026-03-21,135,4,4
 Olive,Vegetables,2026-06-06,58,4,4
 Dates,Fruit,2026-06-19,45,4,4
-Turmeric,Other,2026-07-16,18,4,4
 Grapefruit,Fruit,2025-07-02,397,3,4
 Nectarine,Fruit,2025-07-03,396,3,4
 Spring Onion,Vegetables,2025-10-20,287,3,4
@@ -84,7 +81,10 @@ Cherries,Fruit,2026-07-30,4,39,2
 Coffee,Other,2026-08-02,1,236,1
 Chocolate,Other,2026-08-02,1,187,1
 Rice,Other,2026-08-01,2,108,1
+Potato,Vegetables,2026-08-02,1,79,1
 Almond,Other,2026-08-02,1,69,1
 Banana,Fruit,2026-08-02,1,64,1
 Mushroom,Vegetables,2026-08-02,1,45,1
 Pistachio,Other,2026-08-01,2,42,1
+Carrot,Vegetables,2026-08-02,1,25,1
+Turmeric,Other,2026-08-02,1,5,1
