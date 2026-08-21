@@ -28,7 +28,6 @@ Melon,Fruit,2026-08-04,17,11,4
 Lentils,Other,2026-08-11,10,11,4
 Watermelon,Fruit,2026-01-05,228,10,4
 Kiwi,Fruit,2025-12-06,258,8,4
-Chickpea,Other,2026-07-03,49,8,4
 Pak Choi,Vegetables,2026-07-09,43,8,4
 Edamame,Other,2026-01-08,225,7,4
 Aubergine,Vegetables,2026-06-07,75,7,4
@@ -52,13 +51,11 @@ Kimchi,Other,2025-04-25,483,2,4
 Red cabbage,Vegetables,2026-07-11,41,2,4
 Papaya,Fruit,2026-07-11,41,2,4
 Butter Beans,Other,2026-08-09,12,2,4
-Beetroot,Vegetables,2025-07-05,412,1,4
 Orange,Fruit,2025-06-28,419,1,4
 Pine Nut,Other,2025-12-13,251,1,4
 Turnip,Vegetables,2026-01-01,232,1,4
 Black Eyed Peas,Other,2026-02-16,186,1,4
 Butternut Squash,Vegetables,2026-02-23,179,1,4
-Cauliflower,Vegetables,2026-07-11,41,1,4
 Pomegranate,Fruit,2026-07-27,25,1,4
 Apricot,Fruit,2026-08-14,7,1,4
 Artichoke,Vegetables,,999,0,4
@@ -73,7 +70,6 @@ Rocket,Vegetables,,999,0,4
 Rosa verde,Vegetables,,999,0,4
 Potato,Vegetables,2026-08-16,5,80,3
 Haricot Bean,Other,2026-08-16,5,34,3
-Coffee,Other,2026-08-18,3,246,2
 Chocolate,Other,2026-08-17,4,196,2
 Oats,Other,2026-08-17,4,114,2
 Rice,Other,2026-08-17,4,113,2
@@ -85,7 +81,11 @@ Blackberries,Fruit,2026-08-17,4,52,2
 Coconut,Other,2026-08-17,4,46,2
 Sweet Potato,Vegetables,2026-08-17,4,43,2
 Apple,Fruit,2026-08-17,4,40,2
-Turmeric,Other,2026-08-18,3,13,2
 Pinto Beans,Other,2026-08-17,4,12,2
 Black Beans,Other,2026-08-17,4,8,2
 Cannellini Beans,Other,2026-08-17,4,3,2
+Coffee,Other,2026-08-20,1,248,1
+Turmeric,Other,2026-08-20,1,15,1
+Chickpea,Other,2026-08-20,1,9,1
+Beetroot,Vegetables,2026-08-20,1,2,1
+Cauliflower,Vegetables,2026-08-20,1,2,1
