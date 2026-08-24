@@ -1,20 +1,12 @@
 Food,Category,Last_Date_Eaten,Days_Since_Eaten,Total_Count,Todoist_Priority
 Chocolate,Other,2026-08-17,7,196,4
-Oats,Other,2026-08-17,7,114,4
-Rice,Other,2026-08-17,7,113,4
 Potato,Vegetables,2026-08-16,8,80,4
-Peanut,Other,2026-08-14,10,73,4
 Almond,Other,2026-08-14,10,71,4
 Blueberries,Fruit,2026-08-17,7,67,4
 Banana,Fruit,2026-08-14,10,66,4
 Pumpkin Seed,Other,2026-08-17,7,64,4
-Raspberries,Fruit,2026-08-05,19,57,4
-Strawberries,Fruit,2026-08-12,12,57,4
-Sunflower Seed,Other,2026-08-14,10,57,4
-Avocado,Fruit,2026-08-05,19,56,4
 Onion,Vegetables,2026-08-11,13,56,4
 Brazil Nut,Other,2026-08-17,7,56,4
-Cranberries,Fruit,2026-08-17,7,53,4
 Blackberries,Fruit,2026-08-17,7,52,4
 Tomato,Vegetables,2026-08-05,19,51,4
 Hazelnut,Other,2026-08-12,12,48,4
@@ -23,7 +15,6 @@ Mushroom,Vegetables,2026-08-02,22,45,4
 Walnut,Other,2026-08-12,12,45,4
 Broccoli,Vegetables,2026-07-17,38,44,4
 Pepper,Vegetables,2026-08-07,17,44,4
-Pistachio,Other,2026-08-06,18,43,4
 Sweet Potato,Vegetables,2026-08-17,7,43,4
 Cherries,Fruit,2026-08-05,19,40,4
 Apple,Fruit,2026-08-17,7,40,4
@@ -89,3 +80,12 @@ Turmeric,Other,2026-08-20,4,15,2
 Chickpea,Other,2026-08-20,4,9,2
 Beetroot,Vegetables,2026-08-20,4,2,2
 Cauliflower,Vegetables,2026-08-20,4,2,2
+Oats,Other,2026-08-22,2,115,1
+Rice,Other,2026-08-22,2,114,1
+Peanut,Other,2026-08-22,2,74,1
+Raspberries,Fruit,2026-08-22,2,58,1
+Strawberries,Fruit,2026-08-22,2,58,1
+Sunflower Seed,Other,2026-08-22,2,58,1
+Avocado,Fruit,2026-08-22,2,57,1
+Cranberries,Fruit,2026-08-22,2,54,1
+Pistachio,Other,2026-08-22,2,44,1
