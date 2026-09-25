@@ -23,7 +23,7 @@
 <body>
     <div class="container">
         <h1>🥗 Food Tracker Performance</h1>
-        <p class="subtitle">30-day view with rolling 7-day unique counts (2026-08-26 to 2026-09-24)</p>
+        <p class="subtitle">30-day view with rolling 7-day unique counts (2026-08-27 to 2026-09-25)</p>
         
         <div id="chartContainer">
             <canvas id="performanceChart"></canvas>
@@ -32,11 +32,11 @@
         <div class="stats">
             <div class="stat-box" style="border-left-color: #2196F3;">
                 <div class="stat-label">Today's 7-Day Unique Count</div>
-                <div class="stat-value">17 foods</div>
+                <div class="stat-value">21 foods</div>
             </div>
             <div class="stat-box">
                 <div class="stat-label">30-Day Average (daily)</div>
-                <div class="stat-value">3.0 foods</div>
+                <div class="stat-value">3.2 foods</div>
             </div>
             <div class="stat-box">
                 <div class="stat-label">Best Day (daily)</div>
@@ -54,17 +54,17 @@
         new Chart(ctx, {
             type: 'line',
             data: {
-                labels: ["2026-08-26", "2026-08-27", "2026-08-28", "2026-08-29", "2026-08-30", "2026-08-31", "2026-09-01", "2026-09-02", "2026-09-03", "2026-09-04", "2026-09-05", "2026-09-06", "2026-09-07", "2026-09-08", "2026-09-09", "2026-09-10", "2026-09-11", "2026-09-12", "2026-09-13", "2026-09-14", "2026-09-15", "2026-09-16", "2026-09-17", "2026-09-18", "2026-09-19", "2026-09-20", "2026-09-21", "2026-09-22", "2026-09-23", "2026-09-24"],
+                labels: ["2026-08-27", "2026-08-28", "2026-08-29", "2026-08-30", "2026-08-31", "2026-09-01", "2026-09-02", "2026-09-03", "2026-09-04", "2026-09-05", "2026-09-06", "2026-09-07", "2026-09-08", "2026-09-09", "2026-09-10", "2026-09-11", "2026-09-12", "2026-09-13", "2026-09-14", "2026-09-15", "2026-09-16", "2026-09-17", "2026-09-18", "2026-09-19", "2026-09-20", "2026-09-21", "2026-09-22", "2026-09-23", "2026-09-24", "2026-09-25"],
                 datasets: [
                     {
                         type: 'bar',
                         label: 'Daily Unique Foods',
-                        data: [4, 3, 0, 5, 0, 2, 22, 5, 0, 16, 2, 0, 5, 8, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 0, 0, 10, 0, 0],
+                        data: [3, 0, 5, 0, 2, 22, 5, 0, 16, 2, 0, 5, 8, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 0, 0, 10, 0, 8, 0],
                         backgroundColor:'rgba(0, 0, 0, 0.15)'
                     },
                     {
                         label: 'Rolling 7‑Day Unique Foods',
-                        data: [27, 25, 25, 19, 19, 15, 30, 30, 29, 36, 36, 36, 36, 27, 25, 25, 14, 12, 12, 9, 1, 0, 0, 0, 8, 8, 8, 17, 17, 17],
+                        data: [25, 25, 19, 19, 15, 30, 30, 29, 36, 36, 36, 36, 27, 25, 25, 14, 12, 12, 9, 1, 0, 0, 0, 8, 8, 8, 17, 17, 21, 21],
                         borderColor: '#2196F3',
                         backgroundColor: 'rgba(33, 150, 243, 0.06)',
                         borderWidth: 2,
